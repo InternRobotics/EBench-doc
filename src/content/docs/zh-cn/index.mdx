@@ -1,0 +1,66 @@
+---
+title: 什么是 EBench
+description: EBench 是一个基于 Isaac Sim 的具身操作评测基准。
+---
+
+<div class="overview-shell">
+  <div class="overview-banner">
+    <div class="overview-wordmark">
+      <img src="/brand-mark.svg" alt="Ebench Docs 图标" />
+      <strong>EBENCH</strong>
+    </div>
+  </div>
+
+  <p class="doc-social-line"><strong>目标仓库：</strong><a href="https://github.com/InternRobotics/EBench" target="_blank" rel="noreferrer">InternRobotics/EBench</a></p>
+  <p class="doc-social-line"><strong>当前代码来源：</strong>EBench 目前在 GenManip-Sim 工作区内维护，这套文档按照后续拆分为独立仓库的方式来组织。</p>
+  <div class="doc-divider"></div>
+
+  <p class="doc-intro">
+    EBench 是一个基于 NVIDIA Isaac Sim 的具身操作评测基准。当前文档只覆盖最直接的本地使用路径：配置环境、把资产放到 <code>saved/</code> 目录、启动本地 Ray 评测服务，以及通过 GMP CLI 提交和查看任务。
+  </p>
+
+  <div class="overview-screenshot">
+    <img src="/overview-panel.svg" alt="EBench 评测流程示意图" />
+  </div>
+</div>
+
+## 这套文档包含什么
+
+<div class="feature-cards">
+  <div class="feature-card">
+    <h3>环境配置</h3>
+    <p>说明 Isaac Sim 侧依赖、项目依赖，以及是否拆分 server/client 两套环境。</p>
+  </div>
+  <div class="feature-card">
+    <h3>资产下载</h3>
+    <p>统一约定资产落在 <code>saved/</code> 下，并为最终的 Hugging Face 资产包保留清晰占位。</p>
+  </div>
+  <div class="feature-card">
+    <h3>本地评测流程</h3>
+    <p>涵盖 Ray server、本地提交任务、启动 worker，以及 GMP CLI 的核心命令。</p>
+  </div>
+</div>
+
+## 评测流程
+
+1. 准备 Isaac Sim 兼容环境。
+2. 下载或解压评测资产到 `saved/`。
+3. 用 `ray_eval_server.py` 启动本地评测服务。
+4. 用 `gmp submit` 提交评测任务。
+5. 在 `saved/eval_results/` 中查看产物和结果。
+
+## 仓库关键位置
+
+- `configs/tasks/ebench/`：EBench 任务配置。
+- `ray_eval_server.py`：本地 Ray 评测服务入口。
+- `standalone_tools/packages/genmanip_client/`：`gmp` CLI 和客户端工具。
+- `saved/`：资产、任务包和评测结果所在目录。
+
+## 继续阅读
+
+<div class="overview-link-chips">
+  <a class="overview-link-chip" href="/zh-cn/getting-started/environment/">环境配置</a>
+  <a class="overview-link-chip" href="/zh-cn/getting-started/assets/">资产下载</a>
+  <a class="overview-link-chip" href="/zh-cn/evaluation/run-benchmark/">运行测试</a>
+  <a class="overview-link-chip" href="/zh-cn/tools/gmp-cli/">GMP CLI</a>
+</div>

@@ -1,0 +1,80 @@
+---
+import NavIcon from './NavIcon.astro';
+import { getNavIconName } from './navIconName';
+
+const PAGE_TITLE_ID = '_top';
+const { siteTitle, entry } = Astro.locals.starlightRoute;
+const pageIcon = getNavIconName(entry.data.title, Astro.url.pathname);
+---
+
+<div class="page-heading">
+	<div class="page-heading-copy">
+		<p class="page-eyebrow">{siteTitle}</p>
+		<div class="page-title-row">
+			<span class="page-title-mark" aria-hidden="true">
+				<NavIcon name={pageIcon} />
+			</span>
+			<h1 id={PAGE_TITLE_ID}>{entry.data.title}</h1>
+		</div>
+	</div>
+</div>
+
+<style>
+	.page-heading {
+		display: flex;
+		align-items: flex-start;
+		gap: 1rem;
+		margin-top: 0.35rem;
+		margin-bottom: 0.6rem;
+	}
+
+	.page-eyebrow {
+		margin: 0 0 0.25rem;
+		font-size: 0.68rem;
+		font-weight: 800;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--sl-color-gray-4);
+	}
+
+	.page-title-row {
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+	}
+
+	.page-title-mark {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.85rem;
+		height: 1.85rem;
+		border-radius: 999px;
+		background: var(--ebench-highlight-bg);
+		box-shadow: inset 0 0 0 1px var(--ebench-highlight-border);
+		color: var(--ebench-highlight-text);
+	}
+
+	.page-title-mark :global(.nav-icon) {
+		width: 1.02rem;
+		height: 1.02rem;
+	}
+
+	h1 {
+		margin: 0;
+		font-size: clamp(2rem, 3vw, 2.35rem);
+		line-height: 1.08;
+		font-weight: 800;
+		color: var(--sl-color-gray-1);
+	}
+
+	@media (max-width: 50rem) {
+		.page-heading {
+			align-items: flex-start;
+		}
+
+		h1 {
+			font-size: 1.8rem;
+		}
+	}
+</style>

@@ -1,0 +1,40 @@
+---
+import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
+import SidebarList from './SidebarList.astro';
+
+const { sidebar } = Astro.locals.starlightRoute;
+---
+
+<div class="sidebar-shell">
+	<div class="sidebar-kicker">EBENCH DOCS</div>
+	<SidebarList entries={sidebar} />
+</div>
+
+<div class="md:sl-hidden">
+	<MobileMenuFooter />
+</div>
+
+<style>
+	.sidebar-shell {
+		padding: 1rem 0.8rem 1rem;
+		border: 1px solid var(--ebench-line-subtle);
+		border-radius: 1.1rem;
+		background: rgba(255, 255, 255, 0.76);
+		box-shadow: 0 10px 28px rgba(243, 151, 141, 0.05);
+	}
+
+	.sidebar-kicker {
+		margin-bottom: 0.76rem;
+		padding-inline: 0.62rem;
+		font-size: 0.66rem;
+		font-weight: 800;
+		letter-spacing: 0.12em;
+		color: var(--sl-color-gray-3);
+		text-transform: uppercase;
+	}
+
+	:root:not([data-theme='light']) .sidebar-shell {
+		background: rgba(29, 27, 26, 0.9);
+		box-shadow: none;
+	}
+</style>

@@ -1,0 +1,229 @@
+---
+import NavIcon from './NavIcon.astro';
+import { getNavIconName } from './navIconName';
+
+type SidebarEntry = {
+	type: 'link' | 'group';
+	label: string;
+	href?: string;
+	isCurrent?: boolean;
+	attrs?: Record<string, unknown>;
+	collapsed?: boolean;
+	entries?: SidebarEntry[];
+};
+
+interface Props {
+	entries: SidebarEntry[];
+	nested?: boolean;
+}
+
+const { entries, nested = false } = Astro.props;
+
+const hasCurrent = (entry: SidebarEntry): boolean =>
+	entry.type === 'link' ? Boolean(entry.isCurrent) : (entry.entries ?? []).some(hasCurrent);
+---
+
+<ul class:list={['sidebar-list', { nested }]}>
+	{
+		entries.map((entry) => {
+			const currentBranch = hasCurrent(entry);
+			const iconName = getNavIconName(entry.label, entry.type === 'link' ? entry.href : '');
+			return (
+				<li class="sidebar-item">
+					{
+						entry.type === 'link' ? (
+							<a
+								href={entry.href}
+								aria-current={entry.isCurrent ? 'page' : undefined}
+								class:list={['sidebar-link', { nested, current: entry.isCurrent }]}
+								{...(entry.attrs ?? {})}
+							>
+								<span class="sidebar-label-copy">
+									<NavIcon name={iconName} />
+									<span>{entry.label}</span>
+								</span>
+							</a>
+						) : (
+							<details class:list={['sidebar-group', { 'current-group': currentBranch }]} open={currentBranch || !entry.collapsed}>
+								<summary class:list={['sidebar-summary', { nested, 'current-group': currentBranch }]}>
+									<span class="sidebar-summary-label">
+										<NavIcon name={iconName} />
+										<span>{entry.label}</span>
+									</span>
+									<span class="sidebar-caret" aria-hidden="true">
+										<svg viewBox="0 0 16 16" fill="none">
+											<path d="m5.5 3.5 5 4.5-5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</span>
+								</summary>
+								<div class="sidebar-group-panel">
+									<div class="sidebar-group-panel-inner">
+										<Astro.self entries={entry.entries ?? []} nested />
+									</div>
+								</div>
+							</details>
+						)
+					}
+				</li>
+			);
+		})
+	}
+</ul>
+
+<style>
+	.sidebar-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.sidebar-list.nested {
+		margin-inline-start: 0.95rem;
+		margin-top: 0.26rem;
+		padding-inline-start: 0.35rem;
+	}
+
+	.sidebar-item + .sidebar-item {
+		margin-top: 0.32rem;
+	}
+
+	.sidebar-link,
+	.sidebar-summary {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		column-gap: 0.65rem;
+		min-height: 2.15rem;
+		padding: 0.45rem 0.62rem;
+		border-radius: 0.82rem;
+		color: var(--sl-color-gray-2);
+		text-decoration: none;
+		font-size: 0.865rem;
+		line-height: 1.2;
+		transition:
+			background-color 180ms ease,
+			color 180ms ease,
+			box-shadow 180ms ease;
+	}
+
+	.sidebar-link:not(.nested),
+	.sidebar-summary:not(.nested) {
+		font-size: 0.91rem;
+		font-weight: 700;
+		color: var(--sl-color-gray-1);
+	}
+
+	.sidebar-summary {
+		cursor: pointer;
+		user-select: none;
+	}
+
+	.sidebar-summary::-webkit-details-marker,
+	.sidebar-summary::marker {
+		display: none;
+	}
+
+	.sidebar-summary-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
+		min-width: 0;
+	}
+
+	.sidebar-label-copy {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
+		min-width: 0;
+	}
+
+	.sidebar-link:hover,
+	.sidebar-summary:hover {
+		background: var(--ebench-hover-bg, rgba(44, 32, 30, 0.045));
+		color: var(--sl-color-gray-1);
+	}
+
+	.sidebar-link :global(.nav-icon),
+	.sidebar-summary :global(.nav-icon) {
+		color: color-mix(in srgb, var(--sl-color-accent) 54%, var(--sl-color-gray-3));
+	}
+
+	.sidebar-link.current,
+	.sidebar-link.current:hover,
+	.sidebar-link.current:focus {
+		background: var(--ebench-highlight-bg);
+		color: var(--ebench-highlight-text);
+		box-shadow: inset 0 0 0 1px var(--ebench-highlight-border);
+	}
+
+	.sidebar-summary.current-group {
+		background: var(--ebench-highlight-bg-soft);
+		color: var(--ebench-highlight-text);
+	}
+
+	.sidebar-link.current :global(.nav-icon),
+	.sidebar-summary.current-group :global(.nav-icon) {
+		color: var(--ebench-highlight-text);
+	}
+
+	.sidebar-caret {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		align-self: center;
+		width: 0.95rem;
+		height: 0.95rem;
+		flex-shrink: 0;
+		color: var(--sl-color-gray-4);
+		transform: translateY(0.02rem);
+	}
+
+	.sidebar-caret svg {
+		display: block;
+		width: 100%;
+		height: 100%;
+		transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.sidebar-group[open] > .sidebar-summary .sidebar-caret svg {
+		transform: rotate(90deg);
+	}
+
+	.sidebar-list.nested .sidebar-link,
+	.sidebar-list.nested .sidebar-summary {
+		min-height: 1.8rem;
+		padding-block: 0.36rem;
+		padding-inline: 0.5rem;
+		font-size: 0.835rem;
+		font-weight: 500;
+	}
+
+	.sidebar-list.nested .sidebar-item + .sidebar-item {
+		margin-top: 0.1rem;
+	}
+
+	.sidebar-group-panel {
+		display: grid;
+		grid-template-rows: 0fr;
+		opacity: 0;
+		transition:
+			grid-template-rows 260ms cubic-bezier(0.22, 1, 0.36, 1),
+			opacity 180ms ease;
+	}
+
+	.sidebar-group-panel-inner {
+		overflow: hidden;
+		transform: translateY(-0.18rem);
+		transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.sidebar-group[open] > .sidebar-group-panel {
+		grid-template-rows: 1fr;
+		opacity: 1;
+	}
+
+	.sidebar-group[open] > .sidebar-group-panel > .sidebar-group-panel-inner {
+		transform: translateY(0);
+	}
+
+</style>

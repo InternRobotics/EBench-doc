@@ -1,0 +1,69 @@
+---
+title: What Is EBench
+description: EBench is an Isaac Sim based benchmark for embodied manipulation evaluation.
+---
+
+<div class="overview-shell">
+  <div class="overview-banner">
+    <div class="overview-wordmark">
+      <img src="/brand-mark.svg" alt="Ebench Docs mark" />
+      <strong>EBENCH</strong>
+    </div>
+  </div>
+
+  <p class="doc-social-line"><strong>Repository:</strong> <a href="https://github.com/InternRobotics/EBench" target="_blank" rel="noreferrer">InternRobotics/EBench</a></p>
+  <p class="doc-social-line"><strong>Codebase today:</strong> EBench is currently maintained inside the GenManip-Sim workspace and documented here with the assumption that it will be published as its own repository.</p>
+  <div class="doc-divider"></div>
+
+  <p class="doc-intro">
+    EBench is a benchmark built on NVIDIA Isaac Sim for embodied manipulation evaluation. The
+    documentation here focuses on the practical local workflow: prepare the environment, download
+    assets into <code>saved/</code>, launch the local Ray evaluation server, and run jobs through
+    the GMP client tooling.
+  </p>
+
+  <div class="overview-screenshot">
+    <img src="/overview-panel.svg" alt="Illustration of the EBench evaluation workflow" />
+  </div>
+</div>
+
+## What this site covers
+
+<div class="feature-cards">
+  <div class="feature-card">
+    <h3>Environment setup</h3>
+    <p>Prepare an Isaac Sim based workspace, install the required dependencies, and decide how to split server and client environments.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Asset download</h3>
+    <p>Keep benchmark assets under <code>saved/</code> and leave a clean placeholder for the final Hugging Face package until it is published.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Local evaluation flow</h3>
+    <p>Start the Ray server, submit jobs, run workers, and inspect status through the GMP CLI and the bundled local client.</p>
+  </div>
+</div>
+
+## Evaluation flow
+
+1. Set up an Isaac Sim compatible environment.
+2. Download or unpack the benchmark assets into `saved/`.
+3. Start the local evaluation server with `ray_eval_server.py`.
+4. Submit an evaluation job with `gmp submit`.
+5. Run local workers and inspect outputs under `saved/eval_results/`.
+
+## Repository layout
+
+- `configs/tasks/ebench/`: benchmark task configuration files.
+- `ray_eval_server.py`: local Ray-backed evaluation server.
+- `standalone_tools/packages/genmanip_client/`: the `gmp` CLI and reusable client utilities.
+- `saved/`: downloaded assets, unpacked task packages, and evaluation results.
+
+## Continue reading
+
+<div class="overview-link-chips">
+  <a class="overview-link-chip" href="/getting-started/environment/">Environment Setup</a>
+  <a class="overview-link-chip" href="/getting-started/assets/">Asset Download</a>
+  <a class="overview-link-chip" href="/evaluation/run-benchmark/">Run Evaluation</a>
+  <a class="overview-link-chip" href="/tools/gmp-cli/">GMP CLI</a>
+</div>

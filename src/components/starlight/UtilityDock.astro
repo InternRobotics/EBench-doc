@@ -1,0 +1,17 @@
+---
+import AccentColorPicker from './AccentColorPicker.astro';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<div class="utility-dock" aria-label="Theme and accent controls">
+	<AccentColorPicker />
+	<ThemeToggle />
+</div>
+
+<style>
+	.utility-dock {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
+	}
+</style>

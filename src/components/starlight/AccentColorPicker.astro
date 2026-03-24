@@ -1,0 +1,316 @@
+---
+const isZh = Astro.locals.starlightRoute.locale === 'zh-cn';
+const title = isZh ? '主色' : 'Accent';
+const customLabel = isZh ? '自定义' : 'Custom';
+const presets = ['#ff6b6b', '#ff8a5b', '#f4b740', '#4db6ac', '#5b8def', '#8a6cff'];
+---
+
+<accent-color-picker class="accent-picker" data-default-color="#ff6b6b">
+	<details class="accent-picker__details">
+		<summary aria-label={title}>
+			<span class="accent-picker__summary-icon" aria-hidden="true">
+				<span class="accent-picker__swatch"></span>
+			</span>
+		</summary>
+		<div class="accent-picker__panel">
+			<p class="accent-picker__title">{title}</p>
+			<div class="accent-picker__presets">
+				{
+					presets.map((preset) => (
+						<button
+							class="accent-picker__preset"
+							data-color={preset}
+							type="button"
+							style={`--preset-color: ${preset};`}
+							aria-label={preset}
+						/>
+					))
+				}
+			</div>
+			<label class="accent-picker__custom">
+				<span>{customLabel}</span>
+				<input id="ebench-accent-input" type="color" value="#ff6b6b" aria-label={title} />
+			</label>
+		</div>
+	</details>
+</accent-color-picker>
+
+<script>
+	const storageKey = 'ebench-docs-accent';
+
+	const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+	const sanitizeHex = (value: string | null) =>
+		typeof value === 'string' && /^#?[0-9a-fA-F]{6}$/.test(value)
+			? `#${value.replace('#', '').toLowerCase()}`
+			: null;
+
+	function hexToHsl(hex: string) {
+		const normalized = sanitizeHex(hex);
+		if (!normalized) return null;
+		const raw = normalized.slice(1);
+		const r = parseInt(raw.slice(0, 2), 16) / 255;
+		const g = parseInt(raw.slice(2, 4), 16) / 255;
+		const b = parseInt(raw.slice(4, 6), 16) / 255;
+		const max = Math.max(r, g, b);
+		const min = Math.min(r, g, b);
+		const delta = max - min;
+		let h = 0;
+		if (delta !== 0) {
+			if (max === r) h = ((g - b) / delta) % 6;
+			else if (max === g) h = (b - r) / delta + 2;
+			else h = (r - g) / delta + 4;
+		}
+		h = Math.round(h * 60);
+		if (h < 0) h += 360;
+		const l = (max + min) / 2;
+		const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+		return { h, s: s * 100 };
+	}
+
+	const hslString = (h: number, s: number, l: number) =>
+		`hsl(${Math.round(h)} ${Math.round(s)}% ${Math.round(l)}%)`;
+
+	function applyAccent(root: HTMLElement, hex: string) {
+		const parsed = hexToHsl(hex);
+		if (!parsed) return;
+		const sat = clamp(parsed.s, 58, 92);
+		const warmRange = parsed.h >= 38 && parsed.h <= 72;
+		root.style.setProperty(
+			'--ebench-accent-light-low',
+			hslString(parsed.h, clamp(sat * 0.78, 40, 92), 92)
+		);
+		root.style.setProperty('--ebench-accent-light', hslString(parsed.h, clamp(sat, 62, 92), 60));
+		root.style.setProperty(
+			'--ebench-accent-light-high',
+			hslString(parsed.h, clamp(sat * 0.76, 32, 84), 34)
+		);
+		root.style.setProperty(
+			'--ebench-accent-dark-low',
+			hslString(parsed.h, clamp(sat * 0.54, 28, 72), 20)
+		);
+		root.style.setProperty('--ebench-accent-dark', hslString(parsed.h, clamp(sat, 62, 92), 62));
+		root.style.setProperty(
+			'--ebench-accent-dark-high',
+			hslString(parsed.h, clamp(sat * 0.46, 26, 72), 84)
+		);
+		root.style.setProperty(
+			'--ebench-nav-light',
+			hslString(parsed.h, clamp(sat * 0.9, 56, 88), warmRange ? 50 : 57)
+		);
+		root.style.setProperty(
+			'--ebench-nav-dark',
+			hslString(parsed.h, clamp(sat * 0.56, 34, 72), warmRange ? 28 : 32)
+		);
+		root.style.setProperty('--ebench-accent-chip', sanitizeHex(hex) || '#ff6b6b');
+	}
+
+	const syncPicker = (host: ParentNode, value: string) => {
+		host.querySelectorAll<HTMLElement>('[data-color]').forEach((button) => {
+			button.setAttribute('aria-pressed', String(button.dataset.color === value));
+		});
+		const input = host.querySelector<HTMLInputElement>('input[type="color"]');
+		if (input) input.value = value;
+	};
+
+	if (!customElements.get('accent-color-picker')) {
+		class AccentColorPicker extends HTMLElement {
+			connectedCallback() {
+				if (this.dataset.bound === 'true') return;
+				this.dataset.bound = 'true';
+
+				const defaultColor = sanitizeHex(this.dataset.defaultColor ?? null) || '#ff6b6b';
+				const details = this.querySelector('details');
+				const input = this.querySelector<HTMLInputElement>('input[type="color"]');
+
+				const syncFromStorage = () => {
+					const current = sanitizeHex(localStorage.getItem(storageKey)) || defaultColor;
+					applyAccent(document.documentElement, current);
+					document
+						.querySelectorAll('accent-color-picker')
+						.forEach((picker) => syncPicker(picker, current));
+				};
+
+				syncFromStorage();
+
+				this.querySelectorAll<HTMLButtonElement>('[data-color]').forEach((button) => {
+					button.addEventListener('click', () => {
+						const next = sanitizeHex(button.dataset.color ?? null) || defaultColor;
+						applyAccent(document.documentElement, next);
+						localStorage.setItem(storageKey, next);
+						document
+							.querySelectorAll('accent-color-picker')
+							.forEach((picker) => syncPicker(picker, next));
+						details?.removeAttribute('open');
+					});
+				});
+
+				input?.addEventListener('input', () => {
+					const next = sanitizeHex(input.value) || defaultColor;
+					applyAccent(document.documentElement, next);
+					localStorage.setItem(storageKey, next);
+					document
+						.querySelectorAll('accent-color-picker')
+						.forEach((picker) => syncPicker(picker, next));
+				});
+
+				window.addEventListener('pageshow', syncFromStorage);
+			}
+		}
+
+		customElements.define('accent-color-picker', AccentColorPicker);
+	}
+</script>
+
+<style>
+	@layer starlight.core {
+		.accent-picker {
+			display: inline-flex;
+		}
+
+		.accent-picker__details {
+			position: relative;
+		}
+
+		.accent-picker__details summary {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 2.4rem;
+			height: 2.4rem;
+			border: 1px solid var(--ebench-line-soft);
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.9);
+			list-style: none;
+			cursor: pointer;
+			box-shadow: 0 12px 26px rgba(34, 20, 20, 0.1);
+			transition:
+				background-color 160ms ease,
+				border-color 160ms ease,
+				transform 160ms ease;
+		}
+
+		.accent-picker__details summary::-webkit-details-marker,
+		.accent-picker__details summary::marker {
+			display: none;
+		}
+
+		.accent-picker__details summary:hover,
+		.accent-picker__details[open] summary {
+			background: rgba(255, 255, 255, 0.96);
+			border-color: color-mix(in srgb, var(--sl-color-accent) 22%, white);
+		}
+
+		.accent-picker__summary-icon {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 1.2rem;
+			height: 1.2rem;
+			border-radius: 999px;
+			background:
+				radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.78), transparent 46%),
+				conic-gradient(from 220deg, var(--sl-color-accent), color-mix(in srgb, var(--sl-color-accent) 40%, white), var(--sl-color-accent));
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72);
+		}
+
+		.accent-picker__swatch {
+			width: 0.62rem;
+			height: 0.62rem;
+			border-radius: 999px;
+			background: var(--sl-color-accent);
+		}
+
+		.accent-picker__panel {
+			position: absolute;
+			right: 0;
+			bottom: calc(100% + 0.6rem);
+			display: grid;
+			gap: 0.7rem;
+			width: 12rem;
+			padding: 0.8rem;
+			border: 1px solid var(--ebench-line-soft);
+			border-radius: 1rem;
+			background: rgba(255, 255, 255, 0.95);
+			box-shadow: 0 22px 38px rgba(34, 20, 20, 0.12);
+		}
+
+		.accent-picker__title {
+			margin: 0;
+			font-size: 0.74rem;
+			font-weight: 800;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			color: var(--sl-color-gray-4);
+		}
+
+		.accent-picker__presets {
+			display: grid;
+			grid-template-columns: repeat(6, minmax(0, 1fr));
+			gap: 0.45rem;
+		}
+
+		.accent-picker__preset {
+			width: 1.15rem;
+			height: 1.15rem;
+			padding: 0;
+			border: 0;
+			border-radius: 999px;
+			background: var(--preset-color);
+			cursor: pointer;
+			box-shadow:
+				inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+				0 0 0 1px rgba(44, 32, 30, 0.08);
+		}
+
+		.accent-picker__preset[aria-pressed='true'] {
+			box-shadow:
+				inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+				0 0 0 2px color-mix(in srgb, var(--preset-color) 72%, white);
+		}
+
+		.accent-picker__custom {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 0.8rem;
+			padding: 0.55rem 0.65rem;
+			border-radius: 0.8rem;
+			background: rgba(44, 32, 30, 0.04);
+			color: var(--sl-color-gray-2);
+			font-size: 0.82rem;
+			font-weight: 600;
+		}
+
+		.accent-picker__custom input[type='color'] {
+			width: 1.55rem;
+			height: 1.55rem;
+			padding: 0;
+			border: 0;
+			border-radius: 999px;
+			background: transparent;
+			cursor: pointer;
+			appearance: none;
+		}
+
+		.accent-picker__custom input[type='color']::-webkit-color-swatch-wrapper {
+			padding: 0;
+		}
+
+		.accent-picker__custom input[type='color']::-webkit-color-swatch,
+		.accent-picker__custom input[type='color']::-moz-color-swatch {
+			border: 1px solid rgba(44, 32, 30, 0.08);
+			border-radius: 999px;
+		}
+
+		:root:not([data-theme='light']) .accent-picker__details summary,
+		:root:not([data-theme='light']) .accent-picker__panel {
+			background: rgba(28, 26, 25, 0.96);
+			box-shadow: none;
+		}
+
+		:root:not([data-theme='light']) .accent-picker__custom {
+			background: rgba(255, 255, 255, 0.05);
+		}
+	}
+</style>

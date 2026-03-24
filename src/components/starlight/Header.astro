@@ -1,0 +1,183 @@
+---
+import config from 'virtual:starlight/user-config';
+
+import Search from 'virtual:starlight/components/Search';
+import SiteTitle from 'virtual:starlight/components/SiteTitle';
+
+import LocaleSwitcher from './LocaleSwitcher.astro';
+
+const shouldRenderSearch =
+	config.pagefind || config.components.Search !== '@astrojs/starlight/components/Search.astro';
+
+const isZh = Astro.locals.starlightRoute.locale === 'zh-cn';
+
+const links = [
+	{ href: 'https://github.com/InternRobotics/EBench', label: isZh ? '仓库' : 'Repository' },
+	{ href: 'https://github.com/InternRobotics', label: 'GitHub' },
+];
+---
+
+<div class="ebench-header">
+	<div class="brand-slot">
+		<SiteTitle />
+	</div>
+
+	<div class="center-slot print:hidden">
+		<div class="search-shell">
+			{shouldRenderSearch && <Search class="ebench-search" />}
+		</div>
+	</div>
+
+	<div class="controls-slot print:hidden">
+		<nav class="top-links sl-hidden lg:sl-flex" aria-label={isZh ? '外部链接' : 'External links'}>
+			{
+				links.map((link) => (
+					<a class="top-link" href={link.href} target="_blank" rel="noreferrer">
+						{link.label}
+					</a>
+				))
+			}
+		</nav>
+		<LocaleSwitcher />
+	</div>
+</div>
+
+<style>
+	@layer starlight.core {
+		.ebench-header {
+			display: grid;
+			grid-template-columns: auto minmax(0, 1fr) auto;
+			align-items: center;
+			gap: 1rem;
+			width: 100%;
+			height: 100%;
+		}
+
+		.brand-slot {
+			display: flex;
+			align-items: center;
+			min-width: 0;
+		}
+
+		.center-slot {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 0;
+		}
+
+		.search-shell {
+			display: flex;
+			align-items: center;
+			gap: 0.7rem;
+			width: min(100%, 33.5rem);
+			min-width: 0;
+		}
+
+		.controls-slot {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			gap: 0.55rem;
+			margin-inline-start: auto;
+		}
+
+		.top-links {
+			align-items: center;
+			gap: 1rem;
+			padding-inline-end: 0.15rem;
+		}
+
+		.top-link {
+			color: rgba(255, 255, 255, 0.94);
+			font-size: 0.82rem;
+			font-weight: 700;
+			text-decoration: none;
+			transition: color 160ms ease, opacity 160ms ease;
+		}
+
+		.top-link:hover {
+			color: white;
+		}
+
+		:global(.brand-slot a.site-title) {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.68rem;
+			color: white;
+			font-weight: 800;
+			text-decoration: none;
+		}
+
+		:global(.brand-slot a.site-title img) {
+			width: 1.36rem;
+			height: 1.36rem;
+			border-radius: 0.45rem;
+		}
+
+		:global(.brand-slot .site-title span:last-child) {
+			font-size: 1rem;
+			letter-spacing: -0.01em;
+		}
+
+		:global(.ebench-search) {
+			display: flex;
+			flex: 1 1 28rem;
+			min-width: 0;
+		}
+
+		:global(.ebench-search button[data-open-modal]) {
+			width: 100%;
+			max-width: none;
+			height: 2.14rem;
+			border: 1px solid rgba(255, 255, 255, 0.34);
+			border-radius: 0.88rem;
+			background: rgba(255, 255, 255, 0.11);
+			color: rgba(255, 255, 255, 0.92);
+			backdrop-filter: blur(10px);
+			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+		}
+
+		:global(.ebench-search button[data-open-modal]:hover) {
+			border-color: rgba(255, 255, 255, 0.5);
+			background: rgba(255, 255, 255, 0.16);
+			color: white;
+		}
+
+		:global(.ebench-search button[data-open-modal] kbd) {
+			background: rgba(255, 255, 255, 0.14);
+			color: white;
+		}
+
+		@media (max-width: 72rem) {
+			.ebench-header {
+				gap: 0.8rem;
+			}
+
+			.search-shell {
+				width: min(100%, 27rem);
+			}
+		}
+
+		@media (max-width: 50rem) {
+			.ebench-header {
+				grid-template-columns: auto 1fr auto;
+				gap: 0.55rem;
+			}
+
+			.search-shell {
+				gap: 0.45rem;
+			}
+
+			:global(.brand-slot .site-title span:last-child) {
+				font-size: 0.9rem;
+			}
+
+			:global(.ebench-search button[data-open-modal]) {
+				width: 2.42rem;
+				padding-inline: 0;
+				justify-content: center;
+			}
+		}
+	}
+</style>

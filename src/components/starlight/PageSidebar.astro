@@ -1,0 +1,86 @@
+---
+import MobileTableOfContents from 'virtual:starlight/components/MobileTableOfContents';
+import TableOfContents from 'virtual:starlight/components/TableOfContents';
+---
+
+{
+	Astro.locals.starlightRoute.toc && (
+		<>
+			<div class="lg:sl-hidden">
+				<MobileTableOfContents />
+			</div>
+			<div class="right-sidebar-panel sl-hidden lg:sl-block">
+				<div class="sl-container">
+					<div class="toc-shell">
+						<TableOfContents />
+					</div>
+				</div>
+			</div>
+		</>
+	)
+}
+
+<style>
+	.right-sidebar-panel {
+		position: sticky;
+		top: calc(var(--sl-nav-height) + 0.95rem);
+		padding: 0.15rem 0 1rem;
+	}
+
+	.sl-container {
+		width: 100%;
+	}
+
+	.toc-shell {
+		padding: 0.8rem 0.9rem;
+		border: 1px solid var(--ebench-line-soft);
+		border-radius: 0.95rem;
+		background: rgba(255, 255, 255, 0.76);
+	}
+
+	:global(.toc-shell nav) {
+		padding: 0;
+		background: transparent;
+		border: 0;
+		box-shadow: none;
+	}
+
+	:global(.toc-shell h2) {
+		margin: 0 0 0.45rem;
+		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--sl-color-gray-4);
+	}
+
+	:global(.toc-shell a) {
+		font-size: 0.82rem;
+		color: var(--sl-color-gray-3);
+		text-decoration: none;
+		border-radius: 0.55rem;
+	}
+
+	:global(.toc-shell a:hover) {
+		background: var(--ebench-hover-bg);
+		color: var(--sl-color-gray-2);
+	}
+
+	:global(.toc-shell a[aria-current='true']) {
+		background: var(--ebench-highlight-bg);
+		color: var(--ebench-highlight-text);
+		box-shadow: inset 0 0 0 1px var(--ebench-highlight-border);
+	}
+
+	:root:not([data-theme='light']) .toc-shell {
+		background: var(--ebench-surface-raised);
+	}
+
+	@media (min-width: 72rem) {
+		.right-sidebar-panel {
+			position: sticky;
+			top: calc(var(--sl-nav-height) + 0.95rem);
+			padding: 0.15rem 0 0.5rem;
+		}
+	}
+</style>

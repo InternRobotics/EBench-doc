@@ -1,0 +1,161 @@
+---
+import MobileMenuToggle from 'virtual:starlight/components/MobileMenuToggle';
+import UtilityDock from './UtilityDock.astro';
+
+const { hasSidebar } = Astro.locals.starlightRoute;
+---
+
+<div class="page">
+	<header class="header">
+		<div class="ebench-shell header-shell">
+			<slot name="header" />
+		</div>
+	</header>
+	<div class:list={['ebench-shell', 'body-shell', { 'has-sidebar': hasSidebar }]}>
+		{
+			hasSidebar && (
+				<nav class="sidebar print:hidden" aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}>
+					<MobileMenuToggle />
+					<div id="starlight__sidebar" class="sidebar-pane">
+						<div class="sidebar-content sl-flex">
+							<slot name="sidebar" />
+						</div>
+					</div>
+				</nav>
+			)
+		}
+		<div class="main-frame"><slot /></div>
+	</div>
+	<div class="utility-dock-slot print:hidden">
+		<UtilityDock />
+	</div>
+</div>
+
+<style>
+	@layer starlight.core {
+		.page {
+			min-height: 100vh;
+			scroll-padding-top: calc(var(--sl-nav-height) + 1rem);
+		}
+
+		@media (prefers-reduced-motion: no-preference) {
+			.page {
+				scroll-behavior: smooth;
+			}
+		}
+
+		.header {
+			position: fixed;
+			inset: 0 0 auto;
+			z-index: var(--sl-z-index-navbar);
+			height: var(--sl-nav-height);
+			padding: 0;
+		}
+
+		.ebench-shell {
+			width: min(calc(100vw - clamp(2rem, 4.8vw, 4.75rem)), var(--ebench-shell-width, 74rem));
+			margin-inline: auto;
+		}
+
+		.header-shell {
+			display: flex;
+			align-items: center;
+			height: 100%;
+		}
+
+		.body-shell {
+			padding-top: calc(var(--sl-nav-height) + 1.15rem);
+		}
+
+		.sidebar {
+			min-height: 0;
+		}
+
+		.main-frame {
+			min-width: 0;
+			padding-bottom: 4rem;
+		}
+
+		.sidebar-pane {
+			visibility: var(--sl-sidebar-visibility, hidden);
+			position: fixed;
+			z-index: var(--sl-z-index-menu);
+			inset-block: var(--sl-nav-height) 0;
+			inset-inline-start: 0;
+			width: min(19rem, calc(100vw - 1.25rem));
+			background: var(--sl-color-bg-sidebar);
+			border-inline-end: 1px solid var(--sl-color-hairline-shade);
+			transform: translateX(calc(-100% - 0.5rem));
+			transition: transform 180ms ease, visibility 180ms ease;
+			overflow-y: auto;
+			box-shadow: 16px 0 40px rgba(0, 0, 0, 0.08);
+		}
+
+		:global([aria-expanded='true']) ~ .sidebar-pane {
+			--sl-sidebar-visibility: visible;
+			transform: translateX(0);
+		}
+
+		.sidebar-content {
+			min-height: 100%;
+			padding: 0.9rem 0.8rem 1rem;
+			flex-direction: column;
+		}
+
+		@media (min-width: 50rem) {
+			.page {
+				height: 100vh;
+				overflow-x: hidden;
+				overflow-y: auto;
+				scrollbar-gutter: stable;
+			}
+
+			.body-shell {
+				box-sizing: border-box;
+				padding-bottom: 0.95rem;
+			}
+
+			.body-shell.has-sidebar {
+				display: grid;
+				grid-template-columns: var(--sl-sidebar-width) minmax(0, 1fr);
+				column-gap: 1.15rem;
+				align-items: start;
+			}
+
+			.sidebar {
+				position: sticky;
+				top: calc(var(--sl-nav-height) + 1.15rem);
+				align-self: start;
+			}
+
+			.sidebar-pane {
+				--sl-sidebar-visibility: visible;
+				position: relative;
+				inset: auto;
+				top: auto;
+				width: auto;
+				max-height: calc(100vh - var(--sl-nav-height) - 2.1rem);
+				background: transparent;
+				border: 0;
+				transform: none;
+				box-shadow: none;
+				overflow-y: auto;
+			}
+
+			.sidebar-content {
+				padding: 0;
+			}
+
+			.main-frame {
+				padding-bottom: 0;
+			}
+		}
+
+		.utility-dock-slot {
+			position: fixed;
+			right: clamp(0.85rem, 3vw, 1.6rem);
+			bottom: clamp(0.85rem, 2vw, 1.15rem);
+			z-index: calc(var(--sl-z-index-navbar) + 1);
+		}
+	}
+</style>
