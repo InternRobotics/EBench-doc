@@ -1,73 +1,73 @@
 ---
 title: Environment Setup
-description: Prepare a local EBench workspace with Isaac Sim, project dependencies, and the GMP client.
+description: Prepare GenManip server/client environments for EBench evaluation.
 ---
 
 ## Prerequisites
 
-- Linux workstation with an NVIDIA GPU.
-- CUDA 12.1 and a compatible driver.
-- An Isaac Sim 4.1.0 compatible Python environment.
-- `git-lfs` for large asset tracking.
+- Linux workstation or cluster node with NVIDIA GPU.
+- CUDA 12.1 compatible environment.
+- Isaac Sim runtime (`/isaac-sim/python.sh` or pip-based Isaac Sim packages).
+- Git and (for dataset pull) DVC.
 
-## Clone the repository
-
-The public docs assume the benchmark will live at `InternRobotics/EBench`:
+## 1. Clone benchmark and infra repositories
 
 ```bash
-git clone https://github.com/InternRobotics/EBench.git
-cd EBench
+git clone --recursive -b feature/pioneer https://gitee.pjlab.org.cn/L2/MultimodalVLA/GenManip-Sim.git
+git clone https://gitee.pjlab.org.cn/L2/SimPlatform/EBench.git
 ```
 
-If you are working from the current monorepo layout, replace the repository root with your local `GenManip-Sim` checkout.
-
-## Install simulator-side dependencies
-
-The current install script uses Isaac Sim `4.1.0`, CUDA `12.1`, and Torch `2.4.0`:
+## 2. Install server-side dependencies
 
 ```bash
-export CUDA_HOME=/usr/local/cuda-12.1
-export PATH=$CUDA_HOME/bin:$PATH
-export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
-
-pip install isaacsim==4.1.0 isaacsim-extscache-physics==4.1.0 isaacsim-extscache-kit==4.1.0 isaacsim-extscache-kit-sdk==4.1.0 --extra-index-url https://pypi.nvidia.com
-pip install torch==2.4.0 --extra-index-url https://download.pytorch.org/whl/cu121
-sudo apt install git-lfs
+/isaac-sim/python.sh -m pip install -r GenManip-Sim/requirements.txt
 ```
 
-If you rely on a local Isaac Sim installation instead of the pip wheels above, keep using that setup and run simulator-side commands with `/isaac-sim/python.sh`.
+If you are using a pure Python environment with Isaac Sim wheels, use `python -m pip` instead.
 
-## Install project dependencies
-
-EBench currently depends on `cuRobo` and the repository requirements:
+## 3. Install client package in model environment
 
 ```bash
-mkdir -p saved/envs
-git clone https://github.com/NVlabs/curobo.git saved/envs/curobo
-pip install -e saved/envs/curobo --no-build-isolation
-pip install -r requirements.txt
-```
-
-## Install the GMP client
-
-The `gmp` CLI lives in `standalone_tools/packages/genmanip_client/`:
-
-```bash
-pip install -e standalone_tools/packages/genmanip_client/
+pip install -e GenManip-Sim/standalone_tools/packages/genmanip_client/
 gmp --help
 ```
 
-## Recommended environment split
+Recommended split:
 
-- Server environment: Isaac Sim, benchmark code, `cuRobo`, and repository dependencies.
-- Client environment: `genmanip-client` plus your policy/model dependencies.
+- Server env: Isaac Sim + GenManip-Sim runtime dependencies.
+- Client env: `genmanip-client` + model inference dependencies.
 
-This split is useful when the local evaluation server runs in a heavy Isaac Sim environment, but policy inference runs from a separate lighter environment.
+## 4. Pull EBench dataset
 
-## Quick sanity check
+```bash
+cd EBench
+pip install "dvc[oss,s3]"
+dvc pull
+cd ..
+ln -s EBench GenManip-Sim/saved
+```
 
-Before downloading assets or starting an evaluation, verify:
+## 5. Verify environment
 
-- `saved/` exists in the repository root.
-- `gmp --help` works in the client environment.
-- `python ray_eval_server.py --help` or `/isaac-sim/python.sh ray_eval_server.py --help` works in the simulator environment.
+Terminal 1 (server):
+
+```bash
+cd GenManip-Sim
+/isaac-sim/python.sh ray_eval_server.py -n 50
+```
+
+Terminal 2 (client):
+
+```bash
+gmp submit ebench/mobile_manip/test
+```
+
+If submit succeeds, start one worker:
+
+```bash
+gmp eval -a r5a -g lift2 --worker_ids 0
+```
+
+## Network reminder
+
+When running server and client on different machines, expose the server host/port and pass them explicitly with `--host` and `--port` in all `gmp` commands.

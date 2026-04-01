@@ -1,68 +1,77 @@
 ---
 title: 运行测试
-description: 启动本地 Ray 评测服务，并完整跑通一次 EBench 任务。
+description: 使用 GenManip 的 server/client 工作流端到端运行 EBench。
 ---
 
-## 1. 启动本地评测服务
+## 1. 启动评测服务
 
-如果你使用的是官方 Isaac Sim 安装，优先使用它自带的 Python 启动器：
+如果你用的是本机 Isaac Sim 安装，使用 Isaac Sim Python：
 
 ```bash
 /isaac-sim/python.sh ray_eval_server.py --host 0.0.0.0 --port 8087 --episode_recorder_save_every 0
 ```
 
-如果当前环境已经通过 pip 安装了 Isaac Sim 相关 Python 包，也可以直接运行：
+如果当前环境已经装好了 Isaac Sim 的 Python 包，也可以直接运行：
 
 ```bash
 python ray_eval_server.py --host 0.0.0.0 --port 8087 --episode_recorder_save_every 0
 ```
 
-当前仓库里的默认端口是 `8087`。
-
-## 2. 提交 EBench 任务
-
-服务启动后，在 client 环境里提交一个评测任务：
+快速联调（更短 horizon）可用：
 
 ```bash
-gmp submit ebench/simple_pnp --run_id local_smoke_test --host 127.0.0.1 --port 8087
+/isaac-sim/python.sh ray_eval_server.py -n 50
 ```
 
-`gmp submit` 支持三种常见写法：
+## 2. 提交评测任务
 
-- 完整配置文件路径
-- 简写 benchmark ID，例如 `ebench`
-- 更细一点的路径，例如 `ebench/simple_pnp`
-
-## 3. 启动本地 worker
-
-如果只是做本地联通性检查，可以直接使用仓库内置的 fake action client：
+`gmp submit` 支持单任务、多任务、benchmark 别名和 task-setting 路径。
 
 ```bash
-python standalone_tools/client.py --host 127.0.0.1 --port 8087 --worker_ids 0 -a franka -g panda_hand
+gmp submit ebench/mobile_manip/test --run_id local_smoke_test
+gmp submit ebench/simple_pnp/task1 ebench/simple_pnp/task2 --run_id compare_two_tasks
+gmp submit ebench --run_id full_ebench
 ```
 
-如果要并行起多个 worker，可以传多个 ID：
+`gmp` 默认连接 `127.0.0.1:8087`，也可以覆盖：
 
 ```bash
-python standalone_tools/client.py --host 127.0.0.1 --port 8087 --worker_ids 0,1,2,3
+gmp submit ebench/mobile_manip/val_unseen --host 10.150.129.227 --port 8086
 ```
 
-## 4. 查看状态和输出
+## 3. 启动 client worker
 
-查看当前任务状态：
+使用随机/假动作策略做快速验证：
+
+```bash
+gmp eval -a r5a -g lift2 --worker_ids 0 --host 127.0.0.1 --port 8087 --frame_save_interval 10
+```
+
+接入自定义模型时，建议在自己的循环中使用 EvalClient（`reset -> step -> done`），并在 `get_action(obs)` 中调用模型推理。
+
+## 4. 查看进度和结果
 
 ```bash
 gmp status --host 127.0.0.1 --port 8087
 ```
 
-本地结果会写到：
+结果目录：
 
-```text
-saved/eval_results/<benchmark_id>/<run_id>/
+- Server 侧评测结果：`saved/eval_results/<benchmark_or_task>/<run_id>/`
+- Client 侧日志/视频（默认）：`./client_results/<run_id>/`
+- 可通过 `GENMANIP_RESULT_DIR` 修改 client 结果目录。
+
+## 5. 断点恢复已有 run
+
+使用相同 run ID 可重新连接并查看历史进度：
+
+```bash
+gmp submit ebench --run_id history_id
+gmp status
 ```
 
 ## 说明
 
-- `standalone_tools/client.py` 更适合联通性检查和 smoke test。
-- 真正接入策略时，可以把 fake action loop 替换成你的模型推理逻辑，或者直接使用 `gmp eval`。
-- 如果你不需要保存回放图像，server 侧加上 `--episode_recorder_save_every 0` 会更轻。
+- 建议加 `--episode_recorder_save_every 0` 以减少 server 侧存图开销。
+- 当模型按 chunk 预测动作时，可使用 `gmp eval --chunk_size <N>`。
+- 在线 leaderboard 提交是可选流程，见 CLI 页面。

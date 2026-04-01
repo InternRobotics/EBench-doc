@@ -1,68 +1,77 @@
 ---
 title: Run Evaluation
-description: Start the local Ray evaluation server and run an EBench job end to end.
+description: Run EBench end to end with GenManip server/client workflow.
 ---
 
-## 1. Start the local evaluation server
+## 1. Start the evaluation server
 
-If you are using the official Isaac Sim installation, prefer the bundled Python launcher:
+Use Isaac Sim Python if you run from a local Isaac Sim installation:
 
 ```bash
 /isaac-sim/python.sh ray_eval_server.py --host 0.0.0.0 --port 8087 --episode_recorder_save_every 0
 ```
 
-If your current environment already has the Isaac Sim Python packages installed, the plain Python entry point also works:
+Or run directly in an environment where Isaac Sim packages are already installed:
 
 ```bash
 python ray_eval_server.py --host 0.0.0.0 --port 8087 --episode_recorder_save_every 0
 ```
 
-`8087` is the current default server port in the repository.
-
-## 2. Submit an EBench job
-
-With the server running, submit a benchmark job from the client environment:
+Quick smoke-test option (shorter horizon):
 
 ```bash
-gmp submit ebench/simple_pnp --run_id local_smoke_test --host 127.0.0.1 --port 8087
+/isaac-sim/python.sh ray_eval_server.py -n 50
 ```
 
-The submit flow accepts:
+## 2. Submit benchmark tasks
 
-- full config file paths
-- shorthand benchmark IDs such as `ebench`
-- narrower paths such as `ebench/simple_pnp`
-
-## 3. Start local workers
-
-For a quick local smoke test, the bundled client can run with fake actions:
+`gmp submit` accepts single task, multiple tasks, benchmark aliases, and task-setting paths.
 
 ```bash
-python standalone_tools/client.py --host 127.0.0.1 --port 8087 --worker_ids 0 -a franka -g panda_hand
+gmp submit ebench/mobile_manip/test --run_id local_smoke_test
+gmp submit ebench/simple_pnp/task1 ebench/simple_pnp/task2 --run_id compare_two_tasks
+gmp submit ebench --run_id full_ebench
 ```
 
-For more parallelism, pass multiple worker IDs:
+By default, `gmp` connects to `127.0.0.1:8087`. Override target if needed:
 
 ```bash
-python standalone_tools/client.py --host 127.0.0.1 --port 8087 --worker_ids 0,1,2,3
+gmp submit ebench/mobile_manip/val_unseen --host 10.150.129.227 --port 8086
 ```
 
-## 4. Inspect status and outputs
+## 3. Start client workers
 
-Check the current job status:
+For quick validation with a random/fake policy:
+
+```bash
+gmp eval -a r5a -g lift2 --worker_ids 0 --host 127.0.0.1 --port 8087 --frame_save_interval 10
+```
+
+For custom model integration, use EvalClient in your own loop (`reset -> step -> done`) and call your model in `get_action(obs)`.
+
+## 4. Check progress and outputs
 
 ```bash
 gmp status --host 127.0.0.1 --port 8087
 ```
 
-Local outputs are written under:
+Result directories:
 
-```text
-saved/eval_results/<benchmark_id>/<run_id>/
+- Server-side benchmark results: `saved/eval_results/<benchmark_or_task>/<run_id>/`
+- Client-side logs/videos (default): `./client_results/<run_id>/`
+- Change client result directory with `GENMANIP_RESULT_DIR`.
+
+## 5. Resume an existing run
+
+Use the same run ID to reconnect and inspect historical progress:
+
+```bash
+gmp submit ebench --run_id history_id
+gmp status
 ```
 
 ## Notes
 
-- The example client in `standalone_tools/client.py` is useful for connectivity and smoke tests.
-- For real policy evaluation, replace the fake-action loop with your own policy client or use `gmp eval`.
-- Setting `--episode_recorder_save_every 0` on the server reduces overhead when you do not need image dumps.
+- Use `--episode_recorder_save_every 0` to reduce server image dump overhead.
+- `gmp eval --chunk_size <N>` can be used when your model outputs action chunks.
+- Online leaderboard submission is optional and is documented in the CLI page.

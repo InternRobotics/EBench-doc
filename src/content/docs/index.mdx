@@ -1,6 +1,6 @@
 ---
 title: What Is EBench
-description: EBench is an Isaac Sim based benchmark for embodied manipulation evaluation.
+description: EBench is a multi-dimension embodied manipulation benchmark built on Isaac Sim and GenManip infra.
 ---
 
 <div class="overview-shell">
@@ -11,15 +11,14 @@ description: EBench is an Isaac Sim based benchmark for embodied manipulation ev
     </div>
   </div>
 
-  <p class="doc-social-line"><strong>Repository:</strong> <a href="https://github.com/InternRobotics/EBench" target="_blank" rel="noreferrer">InternRobotics/EBench</a></p>
-  <p class="doc-social-line"><strong>Codebase today:</strong> EBench is currently maintained inside the GenManip-Sim workspace and documented here with the assumption that it will be published as its own repository.</p>
+  <p class="doc-social-line"><strong>Benchmark repo:</strong> <a href="https://gitee.pjlab.org.cn/L2/SimPlatform/EBench.git" target="_blank" rel="noreferrer">L2/SimPlatform/EBench</a></p>
+  <p class="doc-social-line"><strong>Infra repos:</strong> GenManip-Sim (server) + GenManip-Client (client package).</p>
   <div class="doc-divider"></div>
 
   <p class="doc-intro">
-    EBench is a benchmark built on NVIDIA Isaac Sim for embodied manipulation evaluation. The
-    documentation here focuses on the practical local workflow: prepare the environment, download
-    assets into <code>saved/</code>, launch the local Ray evaluation server, and run jobs through
-    the GMP client tooling.
+    EBench is an Isaac Sim based embodied manipulation benchmark that evaluates multiple
+    capability dimensions together: Pick-and-Place, Long-Horizon tasks, and Dexterous &amp; Precise
+    manipulation. The official usage path is built on GenManip&apos;s client-server workflow.
   </p>
 
   <div class="overview-screenshot">
@@ -32,38 +31,65 @@ description: EBench is an Isaac Sim based benchmark for embodied manipulation ev
 <div class="feature-cards">
   <div class="feature-card">
     <h3>Environment setup</h3>
-    <p>Prepare an Isaac Sim based workspace, install the required dependencies, and decide how to split server and client environments.</p>
+    <p>Prepare Isaac Sim + GenManip-Sim server dependencies and a separated client environment for model inference.</p>
   </div>
   <div class="feature-card">
-    <h3>Asset download</h3>
-    <p>Keep benchmark assets under <code>saved/</code> and leave a clean placeholder for the final Hugging Face package until it is published.</p>
+    <h3>Dataset and assets</h3>
+    <p>Pull EBench assets and task data, then place them under <code>saved/</code> (or symlink to that path) for evaluation.</p>
   </div>
   <div class="feature-card">
-    <h3>Local evaluation flow</h3>
-    <p>Start the Ray server, submit jobs, run workers, and inspect status through the GMP CLI and the bundled local client.</p>
+    <h3>Evaluation workflow</h3>
+    <p>Start Ray eval server, submit benchmark configs with <code>gmp submit</code>, run workers/clients, and check progress with <code>gmp status</code>.</p>
   </div>
 </div>
 
-## Evaluation flow
+## Benchmark scope
 
-1. Set up an Isaac Sim compatible environment.
-2. Download or unpack the benchmark assets into `saved/`.
-3. Start the local evaluation server with `ray_eval_server.py`.
-4. Submit an evaluation job with `gmp submit`.
-5. Run local workers and inspect outputs under `saved/eval_results/`.
+- Task families:
+- Pick-and-Place
+- Long-Horizon
+- Dexterous & Precise
+- Generalization dimensions in current settings:
+- unseen objects
+- unseen backgrounds
+- unseen instructions
+- combined unseen setting (`object + background + instruction`)
 
-## Repository layout
+## Infra components
 
-- `configs/tasks/ebench/`: benchmark task configuration files.
-- `ray_eval_server.py`: local Ray-backed evaluation server.
-- `standalone_tools/packages/genmanip_client/`: the `gmp` CLI and reusable client utilities.
-- `saved/`: downloaded assets, unpacked task packages, and evaluation results.
+1. `EBench` dataset: trajectories, benchmark tasks, and scene assets.
+2. `GenManip-Sim` server: Ray-based simulation orchestration.
+3. `genmanip-client` package: CLI and EvalClient API for model-side integration.
+
+## Current task settings (for submit)
+
+- `ebench/mobile_manip/<split>`
+- `ebench/table_top_manip/<split>`
+- `ebench/generalist/<split>`
+- `split` in `{val_train, val_unseen, test}`
+
+Examples:
+
+```bash
+gmp submit ebench/mobile_manip/test
+gmp submit ebench/table_top_manip/val_unseen
+gmp submit ebench/generalist/val_train
+```
+
+## End-to-end flow
+
+1. Prepare environment and install server/client dependencies.
+2. Pull EBench data and map it to `saved/`.
+3. Start `ray_eval_server.py`.
+4. Submit one or more benchmark configs with `gmp submit`.
+5. Run client workers (`gmp eval` or custom EvalClient loop).
+6. Track progress using `gmp status` and read outputs under `saved/eval_results/`.
 
 ## Continue reading
 
 <div class="overview-link-chips">
   <a class="overview-link-chip" href="/getting-started/environment/">Environment Setup</a>
-  <a class="overview-link-chip" href="/getting-started/assets/">Asset Download</a>
+  <a class="overview-link-chip" href="/getting-started/assets/">Dataset and Assets</a>
   <a class="overview-link-chip" href="/evaluation/run-benchmark/">Run Evaluation</a>
   <a class="overview-link-chip" href="/tools/gmp-cli/">GMP CLI</a>
 </div>
