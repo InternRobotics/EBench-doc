@@ -1,49 +1,55 @@
-# Starlight Starter Kit: Basics
+# EBench Docs
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+Documentation site for EBench, an embodied manipulation benchmark built on Isaac Sim and the GenManip evaluation stack.
 
-```
-pnpm create astro@latest -- --template starlight
-```
+This repository contains the Starlight site for setup, assets, evaluation workflow, and `gmp` CLI usage. It is the documentation layer, not the benchmark package itself.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Related repositories
 
-## 🚀 Project Structure
+- `EBench`: benchmark data, trajectories, and packaged assets.
+- `GenManip-Sim`: evaluation server, task configs, and the `genmanip-client` source package.
+- `genmanip-client`: installed from `GenManip-Sim/standalone_tools/packages/genmanip_client/` and provides the `gmp` CLI plus the `EvalClient` API.
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+## Local development
 
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
+Install dependencies:
+
+```bash
+npm install
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+Start the docs site:
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+```bash
+npm run dev
+```
 
-Static assets, like favicons, can be placed in the `public/` directory.
+Build the production site:
 
-## 🧞 Commands
+```bash
+npm run build
+```
 
-All commands are run from the root of the project, from a terminal:
+Preview the production build:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+```bash
+npm run preview
+```
 
-## 👀 Want to learn more?
+## Where to start
 
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+- Docs homepage: `src/content/docs/index.mdx`
+- English docs: `src/content/docs/`
+- Simplified Chinese docs: `src/content/docs/zh-cn/`
+- Site navigation/config: `astro.config.mjs`
+
+## Scope
+
+This repo documents:
+
+- environment setup for the GenManip server and client environments
+- how EBench assets map into `saved/`
+- how to run `ray_eval_server.py`, `gmp submit`, `gmp eval`, and `gmp status`
+- how benchmark families and splits map to submit targets
+
+It does not contain the benchmark assets or the GenManip runtime itself.

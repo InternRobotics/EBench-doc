@@ -5,6 +5,8 @@ description: Submit, monitor, evaluate, and post-process EBench tasks with gmp.
 
 ## Install
 
+Install from the `GenManip-Sim` source tree:
+
 ```bash
 pip install -e standalone_tools/packages/genmanip_client/
 gmp --help
@@ -12,26 +14,21 @@ gmp --help
 
 ## Core commands
 
-- `gmp submit <config_paths...>`: submit or reconnect benchmark tasks on eval server.
-- `gmp status`: inspect progress and metrics for current run.
-- `gmp eval`: run client workers and interact with server episodes.
-- `gmp plot <episode_path>`: post-process episode outputs into visualization artifacts.
+| Command | Purpose |
+| :-- | :-- |
+| [`gmp submit`](#submit-status-and-eval) | Submit or reconnect benchmark tasks on the eval server. |
+| [`gmp status`](#submit-status-and-eval) | Inspect progress and metrics for the current run. |
+| [`gmp eval`](#submit-status-and-eval) | Run client workers and interact with server episodes. |
+| [`gmp plot`](#clean-plot-and-visualize) | Post-process episode outputs into visualization artifacts. |
+| [`gmp clean`](#clean-plot-and-visualize) | Remove generated caches, logs, eval outputs, and temporary leftovers. |
+| [`gmp visualize`](#clean-plot-and-visualize) | Browse eval results and replay episodes in the Rerun viewer. |
+| [`gmp online`](#online-and-leaderboard) | Connect a local policy to a remote online evaluation service. |
 
-## Submit patterns
+## Submit, status, and eval
 
-Single task:
+### Submit patterns
 
-```bash
-gmp submit ebench/simple_pnp/task1 --run_id task1_debug
-```
-
-Multiple tasks in one run:
-
-```bash
-gmp submit ebench/simple_pnp/task1 ebench/simple_pnp/task2 --run_id multi_task_debug
-```
-
-Task setting + split:
+Benchmark family + split:
 
 ```bash
 gmp submit ebench/mobile_manip/test --run_id mobile_test
@@ -45,18 +42,21 @@ Benchmark alias:
 gmp submit ebench --run_id full_benchmark
 ```
 
-## Split and task-setting reference
+### Split and task-setting reference
 
-- Task settings:
+Task settings:
+
 - `mobile_manip`
 - `table_top_manip`
 - `generalist`
-- Splits:
+
+Splits:
+
 - `val_train`
 - `val_unseen`
 - `test`
 
-## Status and resume
+### Status and resume
 
 ```bash
 gmp status --host 127.0.0.1 --port 8087
@@ -64,16 +64,122 @@ gmp submit ebench --run_id history_id
 gmp status
 ```
 
-## Eval examples
+### Eval examples
 
 ```bash
 gmp eval -a r5a -g lift2 --worker_ids 0 --frame_save_interval 10
 gmp eval --worker_ids 0,1 --chunk_size 8 --host 127.0.0.1 --port 8087
+gmp plot client_results/<benchmark>/<run_id>/<task>/<seed>
 ```
 
-## Leaderboard (optional)
+## Clean, plot, and visualize
 
-List local runs (internal mode):
+### Plot episode outputs
+
+```bash
+gmp plot client_results/<benchmark>/<run_id>/<task>/<seed>
+```
+
+### Clean generated files
+
+Use `gmp clean` to remove generated artifacts from local runs.
+
+Preview what would be removed:
+
+```bash
+gmp clean --dry-run
+```
+
+Remove generated mesh cache, eval results, logs, and leftover lock/tmp files:
+
+```bash
+gmp clean
+```
+
+Also remove downloaded benchmark package cache:
+
+```bash
+gmp clean --all
+```
+
+### Visualize results
+
+`gmp visualize` starts a local HTTPS viewer for browsing runs, task success rates, and per-episode replays.
+
+Install the visualize extra first:
+
+```bash
+pip install -e ".[visualize]"
+```
+
+Basic usage:
+
+```bash
+gmp visualize
+gmp visualize --project_root /path/to/GenManip-Sim
+gmp visualize --port 55088
+```
+
+Cache management:
+
+```bash
+gmp visualize --flush-cache --dry-run
+gmp visualize --flush-cache
+```
+
+Notes:
+
+- `gmp visualize` expects evaluation outputs under `saved/eval_results/`.
+- The viewer uses HTTPS and may show a one-time browser certificate warning.
+- The current `rerun-sdk` path used by visualize requires Python 3.11+.
+
+## Online and leaderboard
+
+### Online evaluation
+
+Use the `online` subcommands when your model runs locally but evaluation resources are allocated by a remote GenManip service.
+
+Create a task and wait for a ready endpoint:
+
+```bash
+gmp online submit \
+  --base_url https://example.com \
+  --token YOUR_TOKEN \
+  --task_id T2025123100001 \
+  --model_name internVLA \
+  --model_type VLA \
+  --benchmark_set EBench
+```
+
+Machine-readable workflow:
+
+```bash
+resp=$(gmp online submit \
+  --base_url https://example.com \
+  --token YOUR_TOKEN \
+  --task_id T2025123100001 \
+  --model_name internVLA \
+  --model_type VLA \
+  --benchmark_set EBench \
+  --print_endpoint)
+
+GMP_ONLINE_URL=$(printf '%s' "$resp" | jq -r '.endpoint')
+TASK_ID=$(printf '%s' "$resp" | jq -r '.task_id')
+
+gmp eval --url "$GMP_ONLINE_URL" --run_id "$TASK_ID" --token YOUR_TOKEN
+```
+
+Notes:
+
+- `gmp online submit` waits for the endpoint by default.
+- `gmp online ready` can be used to poll an existing task.
+- `task_id` is typically reused as the local `run_id`.
+
+### Leaderboard (optional)
+
+If you are using the internal online evaluation service, `gmp` also exposes leaderboard-related commands. Keep these examples in a private/internal workflow guide if they are not meant for public users.
+
+List local runs:
 
 ```bash
 export GENMANIP_ENABLE_INTERNAL=1

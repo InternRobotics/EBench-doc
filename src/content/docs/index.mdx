@@ -1,12 +1,12 @@
 ---
 title: What Is EBench
-description: EBench is a multi-dimension embodied manipulation benchmark built on Isaac Sim and GenManip infra.
+description: EBench is a multi-dimensional embodied manipulation benchmark built on Isaac Sim and the GenManip evaluation stack.
 ---
 
 <div class="overview-shell">
   <div class="overview-banner">
     <div class="overview-wordmark">
-      <img src="/brand-mark.svg" alt="Ebench Docs mark" />
+      <img src="/brand-mark.svg" alt="EBench Docs mark" />
       <strong>EBENCH</strong>
     </div>
   </div>
@@ -18,7 +18,7 @@ description: EBench is a multi-dimension embodied manipulation benchmark built o
   <p class="doc-intro">
     EBench is an Isaac Sim based embodied manipulation benchmark that evaluates multiple
     capability dimensions together: Pick-and-Place, Long-Horizon tasks, and Dexterous &amp; Precise
-    manipulation. The official usage path is built on GenManip&apos;s client-server workflow.
+    manipulation. The supported usage path is built on GenManip&apos;s client-server workflow.
   </p>
 
   <div class="overview-screenshot">
@@ -43,30 +43,44 @@ description: EBench is a multi-dimension embodied manipulation benchmark built o
   </div>
 </div>
 
+## Repository roles
+
+- `EBench`: benchmark data, trajectories, and packaged assets.
+- `GenManip-Sim`: the evaluation server, benchmark task configs, and the project root that expects `saved/`.
+- `genmanip-client`: provides `gmp` CLI and the `EvalClient` API for model-side integration..
+
+## Working directories
+
+- Run `ray_eval_server.py` from the `GenManip-Sim/` repository root.
+- Install and run `gmp` from your client environment after installing `genmanip-client`.
+- Keep benchmark data available under `GenManip-Sim/saved/`, either by placing files there directly or symlinking `EBench/` to that path.
+
 ## Benchmark scope
 
-- Task families:
+Task families:
+
 - Pick-and-Place
 - Long-Horizon
 - Dexterous & Precise
-- Generalization dimensions in current settings:
+
+Generalization dimensions in current settings:
+
 - unseen objects
 - unseen backgrounds
 - unseen instructions
 - combined unseen setting (`object + background + instruction`)
-
-## Infra components
-
-1. `EBench` dataset: trajectories, benchmark tasks, and scene assets.
-2. `GenManip-Sim` server: Ray-based simulation orchestration.
-3. `genmanip-client` package: CLI and EvalClient API for model-side integration.
 
 ## Current task settings (for submit)
 
 - `ebench/mobile_manip/<split>`
 - `ebench/table_top_manip/<split>`
 - `ebench/generalist/<split>`
-- `split` in `{val_train, val_unseen, test}`
+
+Supported splits:
+
+- `val_train`
+- `val_unseen`
+- `test`
 
 Examples:
 
@@ -78,12 +92,12 @@ gmp submit ebench/generalist/val_train
 
 ## End-to-end flow
 
-1. Prepare environment and install server/client dependencies.
-2. Pull EBench data and map it to `saved/`.
-3. Start `ray_eval_server.py`.
-4. Submit one or more benchmark configs with `gmp submit`.
-5. Run client workers (`gmp eval` or custom EvalClient loop).
-6. Track progress using `gmp status` and read outputs under `saved/eval_results/`.
+1. Prepare environment and install server/client dependencies
+2. Pull EBench data and map it to `saved/`
+3. Start `ray_eval_server.py`
+4. Submit one or more benchmark configs with `gmp submit`
+5. Run client workers (`gmp eval` or custom EvalClient loop)
+6. Track progress using `gmp status` and read outputs under `saved/eval_results/`
 
 ## Continue reading
 

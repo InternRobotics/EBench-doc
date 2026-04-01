@@ -65,7 +65,7 @@ export default defineConfig({
 			titleDelimiter: '·',
 			logo: {
 				src: './src/assets/brand-mark.svg',
-				alt: 'Ebench Docs',
+				alt: 'EBench Docs',
 			},
 			favicon: '/favicon.svg',
 			tableOfContents: {
@@ -112,19 +112,19 @@ export default defineConfig({
 						},
 						{
 							slug: 'getting-started/assets',
-							label: 'Asset Download',
-							translations: { 'zh-CN': '资产下载' },
+							label: 'Dataset and Assets',
+							translations: { 'zh-CN': '数据与资产' },
 						},
 					],
 				},
 				{
 					label: 'Evaluation',
-					translations: { 'zh-CN': '测试与评测' },
+					translations: { 'zh-CN': '评测' },
 					items: [
 						{
 							slug: 'evaluation/run-benchmark',
 							label: 'Run Evaluation',
-							translations: { 'zh-CN': '运行测试' },
+							translations: { 'zh-CN': '运行评测' },
 						},
 						{
 							slug: 'tools/gmp-cli',

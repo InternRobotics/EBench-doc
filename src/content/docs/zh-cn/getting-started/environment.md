@@ -3,6 +3,12 @@ title: 环境配置
 description: 准备 EBench 评测所需的 GenManip server/client 环境。
 ---
 
+## 组件关系
+
+- `GenManip-Sim` 提供评测服务端入口 `ray_eval_server.py` 和 benchmark task 配置。
+- `genmanip-client` 提供 `gmp` CLI 和 `EvalClient` API。
+- `EBench` 提供需要挂载到 `GenManip-Sim/saved/` 下的 benchmark 数据与资产。
+
 ## 前置条件
 
 - Linux 工作站或集群节点 + NVIDIA GPU。
@@ -19,6 +25,8 @@ git clone https://gitee.pjlab.org.cn/L2/SimPlatform/EBench.git
 
 ## 2. 安装 server 侧依赖
 
+在将要运行 `ray_eval_server.py` 的环境里安装依赖：
+
 ```bash
 /isaac-sim/python.sh -m pip install -r GenManip-Sim/requirements.txt
 ```
@@ -26,6 +34,8 @@ git clone https://gitee.pjlab.org.cn/L2/SimPlatform/EBench.git
 如果你使用的是纯 Python 环境 + Isaac Sim wheels，可改为 `python -m pip`。
 
 ## 3. 在模型环境安装 client 包
+
+从 `GenManip-Sim` 的源码目录安装 `gmp`：
 
 ```bash
 pip install -e GenManip-Sim/standalone_tools/packages/genmanip_client/
@@ -47,6 +57,8 @@ cd ..
 ln -s EBench GenManip-Sim/saved
 ```
 
+完成后，`GenManip-Sim/saved/` 应该能直接看到 benchmark 资产，并作为默认评测输出目录，例如 `saved/eval_results/`。
+
 ## 5. 验证环境
 
 终端 1（server）：
@@ -59,6 +71,7 @@ cd GenManip-Sim
 终端 2（client）：
 
 ```bash
+cd /path/to/your/client-env
 gmp submit ebench/mobile_manip/test
 ```
 

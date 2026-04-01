@@ -6,7 +6,7 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
 <div class="overview-shell">
   <div class="overview-banner">
     <div class="overview-wordmark">
-      <img src="/brand-mark.svg" alt="Ebench Docs 图标" />
+      <img src="/brand-mark.svg" alt="EBench Docs 图标" />
       <strong>EBENCH</strong>
     </div>
   </div>
@@ -25,6 +25,18 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
     <img src="/overview-panel.svg" alt="EBench 评测流程示意图" />
   </div>
 </div>
+
+## 仓库分工
+
+- `EBench`：benchmark 数据、轨迹与打包资产。
+- `GenManip-Sim`：评测服务端、benchmark task 配置，以及默认承载 `saved/` 的项目根目录。
+- `genmanip-client`：从 `GenManip-Sim/standalone_tools/packages/genmanip_client/` 安装的 client 包，提供 `gmp` 和 `EvalClient`。
+
+## 运行位置
+
+- `ray_eval_server.py` 需要在 `GenManip-Sim/` 仓库根目录运行。
+- `gmp` 需要在已安装 `genmanip-client` 的 client 环境中运行。
+- benchmark 数据需要映射到 `GenManip-Sim/saved/`，可以直接放置，也可以把 `EBench/` 软链接到该路径。
 
 ## 这套文档包含什么
 
@@ -45,11 +57,14 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
 
 ## Benchmark 范围
 
-- 任务族：
+任务族：
+
 - Pick-and-Place
 - Long-Horizon
 - Dexterous & Precise
-- 当前设置中的泛化维度：
+
+当前设置中的泛化维度：
+
 - 未见物体（unseen objects）
 - 未见背景（unseen backgrounds）
 - 未见指令（unseen instructions）
@@ -66,7 +81,12 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
 - `ebench/mobile_manip/<split>`
 - `ebench/table_top_manip/<split>`
 - `ebench/generalist/<split>`
-- `split` 取值：`{val_train, val_unseen, test}`
+
+支持的 `split`：
+
+- `val_train`
+- `val_unseen`
+- `test`
 
 示例：
 
@@ -90,6 +110,6 @@ gmp submit ebench/generalist/val_train
 <div class="overview-link-chips">
   <a class="overview-link-chip" href="/zh-cn/getting-started/environment/">环境配置</a>
   <a class="overview-link-chip" href="/zh-cn/getting-started/assets/">数据与资产</a>
-  <a class="overview-link-chip" href="/zh-cn/evaluation/run-benchmark/">运行测试</a>
+  <a class="overview-link-chip" href="/zh-cn/evaluation/run-benchmark/">运行评测</a>
   <a class="overview-link-chip" href="/zh-cn/tools/gmp-cli/">GMP CLI</a>
 </div>

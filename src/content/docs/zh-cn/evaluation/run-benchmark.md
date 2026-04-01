@@ -1,9 +1,11 @@
 ---
-title: 运行测试
+title: 运行评测
 description: 使用 GenManip 的 server/client 工作流端到端运行 EBench。
 ---
 
 ## 1. 启动评测服务
+
+以下命令需要在 `GenManip-Sim/` 仓库根目录运行。
 
 如果你用的是本机 Isaac Sim 安装，使用 Isaac Sim Python：
 
@@ -25,11 +27,14 @@ python ray_eval_server.py --host 0.0.0.0 --port 8087 --episode_recorder_save_eve
 
 ## 2. 提交评测任务
 
-`gmp submit` 支持单任务、多任务、benchmark 别名和 task-setting 路径。
+`gmp` 需要在已安装 `genmanip-client` 的 client 环境中运行。
+
+对 EBench 来说，最清晰的公共入口是 benchmark 别名，以及 benchmark family + split 路径。
 
 ```bash
 gmp submit ebench/mobile_manip/test --run_id local_smoke_test
-gmp submit ebench/simple_pnp/task1 ebench/simple_pnp/task2 --run_id compare_two_tasks
+gmp submit ebench/table_top_manip/val_unseen --run_id tabletop_val_unseen
+gmp submit ebench/generalist/val_train --run_id generalist_val_train
 gmp submit ebench --run_id full_ebench
 ```
 
@@ -41,13 +46,13 @@ gmp submit ebench/mobile_manip/val_unseen --host 10.150.129.227 --port 8086
 
 ## 3. 启动 client worker
 
-使用随机/假动作策略做快速验证：
+使用简单基线策略做快速验证：
 
 ```bash
 gmp eval -a r5a -g lift2 --worker_ids 0 --host 127.0.0.1 --port 8087 --frame_save_interval 10
 ```
 
-接入自定义模型时，建议在自己的循环中使用 EvalClient（`reset -> step -> done`），并在 `get_action(obs)` 中调用模型推理。
+接入自定义模型时，建议在自己的循环中使用 `EvalClient`（`reset -> step -> done`），并在 `get_action(obs)` 中调用模型推理。客户端源码和示例位于 `GenManip-Sim/standalone_tools/packages/genmanip_client/`。
 
 ## 4. 查看进度和结果
 
