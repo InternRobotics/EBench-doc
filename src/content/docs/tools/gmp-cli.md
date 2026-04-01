@@ -16,17 +16,18 @@ gmp --help
 
 | Command | Purpose |
 | :-- | :-- |
-| [`gmp submit`](#submit-status-and-eval) | Submit or reconnect benchmark tasks on the eval server. |
-| [`gmp status`](#submit-status-and-eval) | Inspect progress and metrics for the current run. |
-| [`gmp eval`](#submit-status-and-eval) | Run client workers and interact with server episodes. |
-| [`gmp plot`](#clean-plot-and-visualize) | Post-process episode outputs into visualization artifacts. |
-| [`gmp clean`](#clean-plot-and-visualize) | Remove generated caches, logs, eval outputs, and temporary leftovers. |
-| [`gmp visualize`](#clean-plot-and-visualize) | Browse eval results and replay episodes in the Rerun viewer. |
-| [`gmp online`](#online-and-leaderboard) | Connect a local policy to a remote online evaluation service. |
+| [`gmp submit`](#gmp-submit) | Submit or reconnect benchmark tasks on the eval server. |
+| [`gmp status`](#gmp-status) | Inspect progress and metrics for the current run. |
+| [`gmp eval`](#gmp-eval) | Run client workers and interact with server episodes. |
+| [`gmp plot`](#gmp-plot) | Post-process episode outputs into visualization artifacts. |
+| [`gmp clean`](#gmp-clean) | Remove generated caches, logs, eval outputs, and temporary leftovers. |
+| [`gmp visualize`](#gmp-visualize) | Browse eval results and replay episodes in the Rerun viewer. |
+| [`gmp online`](#gmp-online) | Connect a local policy to a remote online evaluation service. |
+| [`gmp leaderboard`](#gmp-leaderboard) | List or submit runs for the internal leaderboard workflow. |
 
 ## Submit, status, and eval
 
-### Submit patterns
+### `gmp submit`
 
 Benchmark family + split:
 
@@ -42,7 +43,7 @@ Benchmark alias:
 gmp submit ebench --run_id full_benchmark
 ```
 
-### Split and task-setting reference
+Supported task-setting paths:
 
 Task settings:
 
@@ -56,7 +57,7 @@ Splits:
 - `val_unseen`
 - `test`
 
-### Status and resume
+### `gmp status`
 
 ```bash
 gmp status --host 127.0.0.1 --port 8087
@@ -64,23 +65,22 @@ gmp submit ebench --run_id history_id
 gmp status
 ```
 
-### Eval examples
+### `gmp eval`
 
 ```bash
 gmp eval -a r5a -g lift2 --worker_ids 0 --frame_save_interval 10
 gmp eval --worker_ids 0,1 --chunk_size 8 --host 127.0.0.1 --port 8087
-gmp plot client_results/<benchmark>/<run_id>/<task>/<seed>
 ```
 
 ## Clean, plot, and visualize
 
-### Plot episode outputs
+### `gmp plot`
 
 ```bash
 gmp plot client_results/<benchmark>/<run_id>/<task>/<seed>
 ```
 
-### Clean generated files
+### `gmp clean`
 
 Use `gmp clean` to remove generated artifacts from local runs.
 
@@ -102,13 +102,14 @@ Also remove downloaded benchmark package cache:
 gmp clean --all
 ```
 
-### Visualize results
+### `gmp visualize`
 
 `gmp visualize` starts a local HTTPS viewer for browsing runs, task success rates, and per-episode replays.
 
-Install the visualize extra first:
+Install the visualize extra from the `genmanip_client` package directory:
 
 ```bash
+cd GenManip-Sim/standalone_tools/packages/genmanip_client/
 pip install -e ".[visualize]"
 ```
 
@@ -135,9 +136,30 @@ Notes:
 
 ## Online and leaderboard
 
-### Online evaluation
+### `gmp online`
 
 Use the `online` subcommands when your model runs locally but evaluation resources are allocated by a remote GenManip service.
+
+Create an online task without waiting:
+
+```bash
+gmp online create \
+  --base_url https://example.com \
+  --token YOUR_TOKEN \
+  --task_id T2025123100001 \
+  --model_name internVLA \
+  --model_type VLA \
+  --benchmark_set EBench
+```
+
+Check whether an existing task is ready:
+
+```bash
+gmp online ready \
+  --base_url https://example.com \
+  --token YOUR_TOKEN \
+  --task_id T2025123100001
+```
 
 Create a task and wait for a ready endpoint:
 
@@ -171,11 +193,12 @@ gmp eval --url "$GMP_ONLINE_URL" --run_id "$TASK_ID" --token YOUR_TOKEN
 
 Notes:
 
+- `gmp online create` only creates the task record.
 - `gmp online submit` waits for the endpoint by default.
 - `gmp online ready` can be used to poll an existing task.
 - `task_id` is typically reused as the local `run_id`.
 
-### Leaderboard (optional)
+### `gmp leaderboard` (optional)
 
 If you are using the internal online evaluation service, `gmp` also exposes leaderboard-related commands. Keep these examples in a private/internal workflow guide if they are not meant for public users.
 

@@ -16,17 +16,18 @@ gmp --help
 
 | 命令 | 作用 |
 | :-- | :-- |
-| [`gmp submit`](#提交查看与评测) | 向评测服务提交任务或重新连接已有任务。 |
-| [`gmp status`](#提交查看与评测) | 查看当前 run 的进度和指标。 |
-| [`gmp eval`](#提交查看与评测) | 运行 client worker，与 server episode 交互。 |
-| [`gmp plot`](#清理绘图与可视化) | 对 episode 输出做后处理可视化。 |
-| [`gmp clean`](#清理绘图与可视化) | 清理生成的缓存、日志、评测输出和临时残留文件。 |
-| [`gmp visualize`](#清理绘图与可视化) | 浏览评测结果，并在 Rerun viewer 中回放 episode。 |
-| [`gmp online`](#在线服务与排行榜) | 把本地模型接到远端在线评测服务。 |
+| [`gmp submit`](#gmp-submit) | 向评测服务提交任务或重新连接已有任务。 |
+| [`gmp status`](#gmp-status) | 查看当前 run 的进度和指标。 |
+| [`gmp eval`](#gmp-eval) | 运行 client worker，与 server episode 交互。 |
+| [`gmp plot`](#gmp-plot) | 对 episode 输出做后处理可视化。 |
+| [`gmp clean`](#gmp-clean) | 清理生成的缓存、日志、评测输出和临时残留文件。 |
+| [`gmp visualize`](#gmp-visualize) | 浏览评测结果，并在 Rerun viewer 中回放 episode。 |
+| [`gmp online`](#gmp-online) | 把本地模型接到远端在线评测服务。 |
+| [`gmp leaderboard`](#gmp-leaderboard-optional) | 列出或提交内部排行榜使用的 run。 |
 
 ## 提交、查看与评测
 
-### 提交模式
+### `gmp submit`
 
 按 benchmark family + split 提交：
 
@@ -42,7 +43,7 @@ benchmark 别名：
 gmp submit ebench --run_id full_benchmark
 ```
 
-### split 与 task-setting 对照
+支持的 task-setting 路径：
 
 Task setting：
 
@@ -56,7 +57,7 @@ Split：
 - `val_unseen`
 - `test`
 
-### 查看状态与恢复
+### `gmp status`
 
 ```bash
 gmp status --host 127.0.0.1 --port 8087
@@ -64,23 +65,22 @@ gmp submit ebench --run_id history_id
 gmp status
 ```
 
-### 评测示例
+### `gmp eval`
 
 ```bash
 gmp eval -a r5a -g lift2 --worker_ids 0 --frame_save_interval 10
 gmp eval --worker_ids 0,1 --chunk_size 8 --host 127.0.0.1 --port 8087
-gmp plot client_results/<benchmark>/<run_id>/<task>/<seed>
 ```
 
 ## 清理、绘图与可视化
 
-### 绘制 episode 输出
+### `gmp plot`
 
 ```bash
 gmp plot client_results/<benchmark>/<run_id>/<task>/<seed>
 ```
 
-### 清理生成文件
+### `gmp clean`
 
 使用 `gmp clean` 清理本地运行产生的各类生成文件。
 
@@ -102,13 +102,14 @@ gmp clean
 gmp clean --all
 ```
 
-### 可视化结果
+### `gmp visualize`
 
 `gmp visualize` 会启动一个本地 HTTPS viewer，用来浏览 run、查看 task 成功率，并回放单个 episode。
 
-先安装 visualize 额外依赖：
+先进入 `genmanip_client` 包目录，再安装 visualize 额外依赖：
 
 ```bash
+cd GenManip-Sim/standalone_tools/packages/genmanip_client/
 pip install -e ".[visualize]"
 ```
 
@@ -135,9 +136,30 @@ gmp visualize --flush-cache
 
 ## 在线服务与排行榜
 
-### 在线评测
+### `gmp online`
 
 当模型在本地运行、而评测资源由远端 GenManip 服务分配时，使用 `online` 子命令。
+
+仅创建在线任务、不等待资源就绪：
+
+```bash
+gmp online create \
+  --base_url https://example.com \
+  --token YOUR_TOKEN \
+  --task_id T2025123100001 \
+  --model_name internVLA \
+  --model_type VLA \
+  --benchmark_set EBench
+```
+
+检查已有任务是否就绪：
+
+```bash
+gmp online ready \
+  --base_url https://example.com \
+  --token YOUR_TOKEN \
+  --task_id T2025123100001
+```
 
 创建任务并等待 endpoint 就绪：
 
@@ -171,11 +193,12 @@ gmp eval --url "$GMP_ONLINE_URL" --run_id "$TASK_ID" --token YOUR_TOKEN
 
 说明：
 
+- `gmp online create` 只负责创建任务记录。
 - `gmp online submit` 默认会持续轮询直到 endpoint 就绪。
 - `gmp online ready` 可用于轮询已有任务。
 - `task_id` 通常也作为本地 `run_id` 使用。
 
-### Leaderboard（可选）
+### `gmp leaderboard`（可选）
 
 如果你使用的是内部在线评测服务，`gmp` 还提供 leaderboard 相关命令。若这部分不面向公开用户，建议转移到内部文档。
 
