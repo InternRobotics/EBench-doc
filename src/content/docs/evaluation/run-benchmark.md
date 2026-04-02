@@ -51,7 +51,7 @@ For quick validation with a simple baseline policy:
 gmp eval -a r5a -g lift2 --worker_ids 0 --host 127.0.0.1 --port 8087 --frame_save_interval 10 --plot_on_episode_end
 ```
 
-For custom model integration, use `EvalClient` in your own loop (`reset -> step -> done`) and call your model in `get_action(obs)`. The client package source and examples live under `GenManip-Sim/standalone_tools/packages/genmanip_client/`.
+For custom model integration, use `EvalClient` in your own loop (`reset -> step -> done`) and call your model in `get_action(obs)`. See [Integrate Your Own Model](/evaluation/custom-model/) for the input/output schema and a minimal `ModelClient` example. The client package source and examples live under `GenManip-Sim/standalone_tools/packages/genmanip_client/`.
 
 ## 4. Check progress and outputs
 

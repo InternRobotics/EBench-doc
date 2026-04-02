@@ -52,7 +52,7 @@ gmp submit ebench/mobile_manip/val_unseen --host 10.150.129.227 --port 8086
 gmp eval -a r5a -g lift2 --worker_ids 0 --host 127.0.0.1 --port 8087 --frame_save_interval 10
 ```
 
-接入自定义模型时，建议在自己的循环中使用 `EvalClient`（`reset -> step -> done`），并在 `get_action(obs)` 中调用模型推理。客户端源码和示例位于 `GenManip-Sim/standalone_tools/packages/genmanip_client/`。
+接入自定义模型时，建议在自己的循环中使用 `EvalClient`（`reset -> step -> done`），并在 `get_action(obs)` 中调用模型推理。输入输出格式和最小 `ModelClient` 示例见[接入自定义模型](/zh-cn/evaluation/custom-model/)。客户端源码和示例位于 `GenManip-Sim/standalone_tools/packages/genmanip_client/`。
 
 ## 4. 查看进度和结果
 

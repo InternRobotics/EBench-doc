@@ -72,6 +72,8 @@ gmp eval -a r5a -g lift2 --worker_ids 0 --frame_save_interval 10
 gmp eval --worker_ids 0,1 --chunk_size 8 --host 127.0.0.1 --port 8087
 ```
 
+接入自定义模型请见[接入自定义模型](/zh-cn/evaluation/custom-model/)。
+
 ## 清理、绘图与可视化
 
 ### `gmp plot`

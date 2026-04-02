@@ -127,6 +127,11 @@ export default defineConfig({
 							translations: { 'zh-CN': '运行评测' },
 						},
 						{
+							slug: 'evaluation/custom-model',
+							label: 'Integrate Your Own Model',
+							translations: { 'zh-CN': '接入自定义模型' },
+						},
+						{
 							slug: 'tools/gmp-cli',
 							label: 'GMP CLI',
 							translations: { 'zh-CN': 'GMP CLI' },
