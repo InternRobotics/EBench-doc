@@ -178,16 +178,17 @@ const presets = ['#ff6b6b', '#ff8a5b', '#f4b740', '#4db6ac', '#5b8def', '#8a6cff
 			justify-content: center;
 			width: 2.4rem;
 			height: 2.4rem;
-			border: 1px solid var(--ebench-line-soft);
+			border: 1px solid var(--ebench-line-subtle);
 			border-radius: 999px;
-			background: rgba(255, 255, 255, 0.9);
+			background: rgba(255, 255, 255, 0.85);
+			backdrop-filter: blur(12px);
 			list-style: none;
 			cursor: pointer;
-			box-shadow: 0 12px 26px rgba(34, 20, 20, 0.1);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 			transition:
-				background-color 160ms ease,
-				border-color 160ms ease,
-				transform 160ms ease;
+				background-color 200ms ease,
+				border-color 200ms ease,
+				transform 200ms ease;
 		}
 
 		.accent-picker__details summary::-webkit-details-marker,
@@ -228,11 +229,12 @@ const presets = ['#ff6b6b', '#ff8a5b', '#f4b740', '#4db6ac', '#5b8def', '#8a6cff
 			display: grid;
 			gap: 0.7rem;
 			width: 12rem;
-			padding: 0.8rem;
-			border: 1px solid var(--ebench-line-soft);
+			padding: 0.85rem;
+			border: 1px solid var(--ebench-line-subtle);
 			border-radius: 1rem;
-			background: rgba(255, 255, 255, 0.95);
-			box-shadow: 0 22px 38px rgba(34, 20, 20, 0.12);
+			background: rgba(255, 255, 255, 0.92);
+			backdrop-filter: blur(16px);
+			box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
 		}
 
 		.accent-picker__title {
@@ -303,10 +305,16 @@ const presets = ['#ff6b6b', '#ff8a5b', '#f4b740', '#4db6ac', '#5b8def', '#8a6cff
 			border-radius: 999px;
 		}
 
-		:root:not([data-theme='light']) .accent-picker__details summary,
+		:root:not([data-theme='light']) .accent-picker__details summary {
+			background: rgba(26, 24, 23, 0.88);
+			backdrop-filter: blur(14px);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+		}
+
 		:root:not([data-theme='light']) .accent-picker__panel {
-			background: rgba(28, 26, 25, 0.96);
-			box-shadow: none;
+			background: rgba(26, 24, 23, 0.92);
+			backdrop-filter: blur(16px);
+			box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
 		}
 
 		:root:not([data-theme='light']) .accent-picker__custom {

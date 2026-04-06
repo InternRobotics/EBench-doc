@@ -33,9 +33,11 @@ import TableOfContents from 'virtual:starlight/components/TableOfContents';
 
 	.toc-shell {
 		padding: 0.8rem 0.9rem;
-		border: 1px solid var(--ebench-line-soft);
-		border-radius: 0.95rem;
-		background: rgba(255, 255, 255, 0.76);
+		border: 1px solid var(--ebench-line-subtle);
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.6);
+		backdrop-filter: blur(12px);
+		box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
 	}
 
 	:global(.toc-shell nav) {
@@ -73,7 +75,9 @@ import TableOfContents from 'virtual:starlight/components/TableOfContents';
 	}
 
 	:root:not([data-theme='light']) .toc-shell {
-		background: var(--ebench-surface-raised);
+		background: rgba(26, 24, 23, 0.65);
+		backdrop-filter: blur(14px);
+		box-shadow: none;
 	}
 
 	@media (min-width: 72rem) {

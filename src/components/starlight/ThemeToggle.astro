@@ -5,26 +5,54 @@ const labels = {
 	dark: isZh ? '深色' : 'Dark',
 	auto: isZh ? '自动' : 'Auto',
 };
+const accessibleLabel = isZh ? '主题切换' : 'Theme';
 ---
 
-<theme-toggle class="theme-toggle" data-light={labels.light} data-dark={labels.dark} data-auto={labels.auto}>
-	<button class="theme-toggle__button" data-theme="light" aria-label={labels.light} type="button">
-		<svg viewBox="0 0 20 20" fill="none">
-			<circle cx="10" cy="10" r="3.1" stroke="currentColor" stroke-width="1.6" />
-			<path d="M10 2.7v2.1M10 15.2v2.1M4.8 4.8l1.5 1.5M13.7 13.7l1.5 1.5M2.7 10h2.1M15.2 10h2.1M4.8 15.2l1.5-1.5M13.7 6.3l1.5-1.5" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" />
-		</svg>
-	</button>
-	<button class="theme-toggle__button" data-theme="dark" aria-label={labels.dark} type="button">
-		<svg viewBox="0 0 20 20" fill="none">
-			<path d="M13.8 14.6A6.3 6.3 0 0 1 5.4 6.2a6.6 6.6 0 1 0 8.4 8.4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
-		</svg>
-	</button>
-	<button class="theme-toggle__button" data-theme="auto" aria-label={labels.auto} type="button">
-		<svg viewBox="0 0 20 20" fill="none">
-			<rect x="3.5" y="4.4" width="13" height="9" rx="1.9" stroke="currentColor" stroke-width="1.45" />
-			<path d="M7.4 15.6h5.2M10 13.7v1.9" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" />
-		</svg>
-	</button>
+<theme-toggle class="theme-toggle">
+	<details class="theme-toggle__details">
+		<summary aria-label={accessibleLabel}>
+			<span class="theme-toggle__summary-icon" aria-hidden="true">
+				<svg class="theme-toggle__icon" data-icon="light" viewBox="0 0 20 20" fill="none">
+					<circle cx="10" cy="10" r="3.1" stroke="currentColor" stroke-width="1.6" />
+					<path d="M10 3v2M10 15v2M4.9 4.9l1.4 1.4M13.7 13.7l1.4 1.4M3 10h2M15 10h2M4.9 15.1l1.4-1.4M13.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+				</svg>
+				<svg class="theme-toggle__icon" data-icon="dark" viewBox="0 0 20 20" fill="none">
+					<path d="M13.6 14A5.8 5.8 0 0 1 6 6.4a6.1 6.1 0 1 0 7.6 7.6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+				</svg>
+				<svg class="theme-toggle__icon" data-icon="auto" viewBox="0 0 20 20" fill="none">
+					<rect x="3.5" y="4.8" width="13" height="8.6" rx="1.9" stroke="currentColor" stroke-width="1.5" />
+					<path d="M7.6 15.2h4.8M10 13.7v1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+				</svg>
+			</span>
+			<span class="theme-toggle__caret" aria-hidden="true">
+				<svg viewBox="0 0 16 16" fill="none">
+					<path d="m4.5 6 3.5 4 3.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</span>
+		</summary>
+		<div class="theme-toggle__menu">
+			<button class="theme-toggle__option" data-theme="light" type="button">
+				<svg viewBox="0 0 20 20" fill="none">
+					<circle cx="10" cy="10" r="3.1" stroke="currentColor" stroke-width="1.6" />
+					<path d="M10 3v2M10 15v2M4.9 4.9l1.4 1.4M13.7 13.7l1.4 1.4M3 10h2M15 10h2M4.9 15.1l1.4-1.4M13.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+				</svg>
+				<span>{labels.light}</span>
+			</button>
+			<button class="theme-toggle__option" data-theme="dark" type="button">
+				<svg viewBox="0 0 20 20" fill="none">
+					<path d="M13.6 14A5.8 5.8 0 0 1 6 6.4a6.1 6.1 0 1 0 7.6 7.6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+				</svg>
+				<span>{labels.dark}</span>
+			</button>
+			<button class="theme-toggle__option" data-theme="auto" type="button">
+				<svg viewBox="0 0 20 20" fill="none">
+					<rect x="3.5" y="4.8" width="13" height="8.6" rx="1.9" stroke="currentColor" stroke-width="1.5" />
+					<path d="M7.6 15.2h4.8M10 13.7v1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+				</svg>
+				<span>{labels.auto}</span>
+			</button>
+		</div>
+	</details>
 </theme-toggle>
 
 <script>
@@ -47,8 +75,11 @@ const labels = {
 		} catch {}
 	};
 
-	const syncButtons = (host: ParentNode, theme: Theme) => {
-		host.querySelectorAll<HTMLButtonElement>('button[data-theme]').forEach((button) => {
+	const syncToggle = (host: HTMLElement, theme: Theme) => {
+		host.querySelectorAll<SVGElement>('.theme-toggle__icon').forEach((icon) => {
+			icon.style.display = icon.dataset.icon === theme ? '' : 'none';
+		});
+		host.querySelectorAll<HTMLButtonElement>('.theme-toggle__option').forEach((button) => {
 			button.setAttribute('aria-pressed', String(button.dataset.theme === theme));
 		});
 	};
@@ -57,7 +88,7 @@ const labels = {
 		document.documentElement.dataset.theme = theme === 'auto' ? getPreferredColorScheme() : theme;
 		storeTheme(theme);
 		window.StarlightThemeProvider?.updatePickers(theme);
-		document.querySelectorAll('theme-toggle').forEach((host) => syncButtons(host, theme));
+		document.querySelectorAll<HTMLElement>('theme-toggle').forEach((host) => syncToggle(host, theme));
 	};
 
 	if (!customElements.get('theme-toggle')) {
@@ -70,18 +101,21 @@ const labels = {
 				if (this.dataset.bound === 'true') return;
 				this.dataset.bound = 'true';
 
+				const details = this.querySelector('details');
+
 				const sync = () => {
 					const current = loadTheme();
 					document.documentElement.dataset.theme =
 						current === 'auto' ? getPreferredColorScheme() : current;
-					syncButtons(this, current);
+					syncToggle(this, current);
 				};
 
 				sync();
 
-				this.querySelectorAll<HTMLButtonElement>('button[data-theme]').forEach((button) => {
+				this.querySelectorAll<HTMLButtonElement>('.theme-toggle__option').forEach((button) => {
 					button.addEventListener('click', () => {
 						applyTheme(parseTheme(button.dataset.theme));
+						details?.removeAttribute('open');
 					});
 				});
 
@@ -97,50 +131,134 @@ const labels = {
 	@layer starlight.core {
 		.theme-toggle {
 			display: inline-flex;
-			align-items: center;
-			gap: 0.16rem;
-			padding: 0.22rem;
-			border: 1px solid var(--ebench-line-soft);
-			border-radius: 999px;
-			background: rgba(255, 255, 255, 0.9);
-			box-shadow: 0 12px 26px rgba(34, 20, 20, 0.1);
 		}
 
-		.theme-toggle__button {
+		.theme-toggle__details {
+			position: relative;
+		}
+
+		.theme-toggle__details summary {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.28rem;
+			height: 2.08rem;
+			padding: 0 0.58rem;
+			border: 1px solid rgba(255, 255, 255, 0.28);
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.1);
+			color: rgba(255, 255, 255, 0.96);
+			list-style: none;
+			cursor: pointer;
+			backdrop-filter: blur(10px);
+			transition:
+				background-color 160ms ease,
+				border-color 160ms ease;
+		}
+
+		.theme-toggle__details summary::-webkit-details-marker,
+		.theme-toggle__details summary::marker {
+			display: none;
+		}
+
+		.theme-toggle__details summary:hover {
+			background: rgba(255, 255, 255, 0.16);
+			border-color: rgba(255, 255, 255, 0.44);
+		}
+
+		.theme-toggle__details[open] summary {
+			background: rgba(255, 255, 255, 0.18);
+			border-color: rgba(255, 255, 255, 0.48);
+		}
+
+		.theme-toggle__details[open] {
+			z-index: 12;
+		}
+
+		.theme-toggle__summary-icon {
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
-			width: 1.95rem;
-			height: 1.95rem;
-			padding: 0;
-			border: 0;
-			border-radius: 999px;
-			background: transparent;
-			color: var(--sl-color-gray-3);
-			cursor: pointer;
-			transition:
-				background-color 160ms ease,
-				color 160ms ease,
-				transform 160ms ease;
+			width: 0.92rem;
+			height: 0.92rem;
+			flex-shrink: 0;
 		}
 
-		.theme-toggle__button svg {
+		.theme-toggle__summary-icon svg {
 			display: block;
-			width: 1rem;
-			height: 1rem;
+			width: 100%;
+			height: 100%;
 		}
 
-		.theme-toggle__button:hover {
+		.theme-toggle__caret {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 0.92rem;
+			height: 0.92rem;
+			flex-shrink: 0;
+		}
+
+		.theme-toggle__caret svg {
+			display: block;
+			width: 100%;
+			height: 100%;
+			transition: transform 180ms ease;
+		}
+
+		.theme-toggle__details[open] .theme-toggle__caret svg {
+			transform: rotate(180deg);
+		}
+
+		.theme-toggle__menu {
+			position: absolute;
+			inset: calc(100% + 0.38rem) auto auto 50%;
+			transform: translateX(-50%);
+			display: grid;
+			gap: 0.22rem;
+			width: max-content;
+			min-width: max(100%, 8.25rem);
+			padding: 0.45rem;
+			border: 1px solid var(--ebench-line-soft);
+			border-radius: 0.9rem;
+			background: rgba(255, 255, 255, 0.94);
+			box-shadow: 0 18px 36px rgba(34, 20, 20, 0.12);
+		}
+
+		.theme-toggle__option {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			width: 100%;
+			padding: 0.48rem 0.65rem;
+			margin: 0;
+			border: 0;
+			border-radius: 0.66rem;
+			background: transparent;
+			color: var(--sl-color-gray-2);
+			font-size: 0.84rem;
+			font-weight: 600;
+			cursor: pointer;
+			text-align: start;
+		}
+
+		.theme-toggle__option svg {
+			display: block;
+			flex-shrink: 0;
+			width: 0.92rem;
+			height: 0.92rem;
+		}
+
+		.theme-toggle__option:hover {
 			background: var(--ebench-hover-bg);
 			color: var(--sl-color-gray-1);
 		}
 
-		.theme-toggle__button[aria-pressed='true'] {
+		.theme-toggle__option[aria-pressed='true'] {
 			background: var(--ebench-highlight-bg);
 			color: var(--ebench-highlight-text);
 		}
 
-		:root:not([data-theme='light']) .theme-toggle {
+		:root:not([data-theme='light']) .theme-toggle__menu {
 			background: var(--ebench-surface-raised);
 			box-shadow: none;
 		}

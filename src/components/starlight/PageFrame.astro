@@ -1,7 +1,5 @@
 ---
 import MobileMenuToggle from 'virtual:starlight/components/MobileMenuToggle';
-import UtilityDock from './UtilityDock.astro';
-
 const { hasSidebar } = Astro.locals.starlightRoute;
 ---
 
@@ -25,9 +23,6 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 			)
 		}
 		<div class="main-frame"><slot /></div>
-	</div>
-	<div class="utility-dock-slot print:hidden">
-		<UtilityDock />
 	</div>
 </div>
 
@@ -151,11 +146,5 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 			}
 		}
 
-		.utility-dock-slot {
-			position: fixed;
-			right: clamp(0.85rem, 3vw, 1.6rem);
-			bottom: clamp(0.85rem, 2vw, 1.15rem);
-			z-index: calc(var(--sl-z-index-navbar) + 1);
-		}
 	}
 </style>

@@ -4,10 +4,11 @@ description: EBench is a multi-dimensional embodied manipulation benchmark built
 ---
 
 <div class="overview-shell">
-  <div class="overview-banner">
-    <div class="overview-wordmark">
-      <img src="/brand-mark.svg" alt="EBench Docs mark" />
-      <strong>EBENCH</strong>
+  <div class="hero-section">
+    <div class="hero-content">
+      <img src="/brand-mark.svg" alt="EBench" class="hero-logo" />
+      <div class="hero-title">EBENCH</div>
+      <p class="hero-tagline">Multi-dimensional embodied manipulation benchmark built on Isaac Sim</p>
     </div>
   </div>
 
@@ -21,14 +22,29 @@ description: EBench is a multi-dimensional embodied manipulation benchmark built
     manipulation. The supported usage path is built on GenManip&apos;s client-server workflow.
   </p>
 
-  <div class="overview-screenshot">
-    <img src="/overview-panel.svg" alt="Illustration of the EBench evaluation workflow" />
-  </div>
+  <p class="doc-intro">
+    EBench uses a client–server architecture. The server runs Isaac Sim and exposes the simulation
+    environment as a black box. A minimal client package, with very few dependencies, can be installed
+    into the model's own environment and imported directly to communicate with the server — avoiding
+    dependency conflicts entirely.
+  </p>
 </div>
+
+## Repository roles
+
+- `EBench`: benchmark data, trajectories, and packaged assets.
+- `GenManip-Sim`: the evaluation server, benchmark task configs, and the project root that expects `saved/`.
+- `genmanip-client`: provides `gmp` CLI and the `EvalClient` API for model-side integration.
+
+## Working directories
+
+- Run `ray_eval_server.py` from the `GenManip-Sim/` repository root.
+- Install and run `gmp` from your client environment after installing `genmanip-client`.
+- Keep benchmark data available under `GenManip-Sim/saved/`, either by placing files there directly or symlinking `EBench/` to that path.
 
 ## What this site covers
 
-<div class="feature-cards">
+<div class="feature-cards not-content">
   <div class="feature-card">
     <h3>Environment setup</h3>
     <p>Prepare Isaac Sim + GenManip-Sim server dependencies and a separated client environment for model inference.</p>
@@ -42,18 +58,6 @@ description: EBench is a multi-dimensional embodied manipulation benchmark built
     <p>Start Ray eval server, submit benchmark configs with <code>gmp submit</code>, run workers/clients, and check progress with <code>gmp status</code>.</p>
   </div>
 </div>
-
-## Repository roles
-
-- `EBench`: benchmark data, trajectories, and packaged assets.
-- `GenManip-Sim`: the evaluation server, benchmark task configs, and the project root that expects `saved/`.
-- `genmanip-client`: provides `gmp` CLI and the `EvalClient` API for model-side integration..
-
-## Working directories
-
-- Run `ray_eval_server.py` from the `GenManip-Sim/` repository root.
-- Install and run `gmp` from your client environment after installing `genmanip-client`.
-- Keep benchmark data available under `GenManip-Sim/saved/`, either by placing files there directly or symlinking `EBench/` to that path.
 
 ## Benchmark scope
 

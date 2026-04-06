@@ -4,10 +4,11 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
 ---
 
 <div class="overview-shell">
-  <div class="overview-banner">
-    <div class="overview-wordmark">
-      <img src="/brand-mark.svg" alt="EBench Docs 图标" />
-      <strong>EBENCH</strong>
+  <div class="hero-section">
+    <div class="hero-content">
+      <img src="/brand-mark.svg" alt="EBench" class="hero-logo" />
+      <div class="hero-title">EBENCH</div>
+      <p class="hero-tagline">基于 Isaac Sim 的多维度具身操作评测基准</p>
     </div>
   </div>
 
@@ -21,9 +22,9 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
     GenManip 的 client-server 工作流。
   </p>
 
-  <div class="overview-screenshot">
-    <img src="/overview-panel.svg" alt="EBench 评测流程示意图" />
-  </div>
+  <p class="doc-intro">
+    EBench 采用 client–server 架构。Server 端运行 Isaac Sim 并以黑盒的方式启动仿真环境；Client 端是一个依赖极少的轻量包，可以直接安装到模型所在的环境中，通过 import 通信 client 与 Server 交互，避免依赖冲突。
+  </p>
 </div>
 
 ## 仓库分工
@@ -40,7 +41,7 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
 
 ## 这套文档包含什么
 
-<div class="feature-cards">
+<div class="feature-cards not-content">
   <div class="feature-card">
     <h3>环境配置</h3>
     <p>准备 Isaac Sim + GenManip-Sim 的 server 依赖，以及独立的 client 推理环境。</p>

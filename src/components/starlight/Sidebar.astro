@@ -18,23 +18,25 @@ const { sidebar } = Astro.locals.starlightRoute;
 	.sidebar-shell {
 		padding: 1rem 0.8rem 1rem;
 		border: 1px solid var(--ebench-line-subtle);
-		border-radius: 1.1rem;
-		background: rgba(255, 255, 255, 0.76);
-		box-shadow: 0 10px 28px rgba(243, 151, 141, 0.05);
+		border-radius: 1.15rem;
+		background: rgba(255, 255, 255, 0.6);
+		backdrop-filter: blur(12px);
+		box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03);
 	}
 
 	.sidebar-kicker {
 		margin-bottom: 0.76rem;
 		padding-inline: 0.62rem;
-		font-size: 0.66rem;
-		font-weight: 800;
-		letter-spacing: 0.12em;
-		color: var(--sl-color-gray-3);
+		font-size: 0.64rem;
+		font-weight: 750;
+		letter-spacing: 0.13em;
+		color: var(--sl-color-gray-4);
 		text-transform: uppercase;
 	}
 
 	:root:not([data-theme='light']) .sidebar-shell {
-		background: rgba(29, 27, 26, 0.9);
+		background: rgba(26, 24, 23, 0.65);
+		backdrop-filter: blur(14px);
 		box-shadow: none;
 	}
 </style>
