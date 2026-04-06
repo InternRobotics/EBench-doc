@@ -66,6 +66,11 @@ export default defineConfig({
 					translations: { 'zh-CN': '什么是 EBench' },
 				},
 				{
+					slug: 'evaluation/task-showcase',
+					label: 'Task Showcase',
+					translations: { 'zh-CN': '任务展示' },
+				},
+				{
 					label: 'Getting Started',
 					translations: { 'zh-CN': '快速开始' },
 					items: [
@@ -86,11 +91,6 @@ export default defineConfig({
 					translations: { 'zh-CN': '评测' },
 					items: [
 						{
-							slug: 'evaluation/task-showcase',
-							label: 'Task Showcase',
-							translations: { 'zh-CN': '任务展示' },
-						},
-						{
 							slug: 'evaluation/run-benchmark',
 							label: 'Run Evaluation',
 							translations: { 'zh-CN': '运行评测' },
@@ -100,6 +100,12 @@ export default defineConfig({
 							label: 'Integrate Your Own Model',
 							translations: { 'zh-CN': '接入自定义模型' },
 						},
+					],
+				},
+				{
+					label: 'Reference',
+					translations: { 'zh-CN': '参考' },
+					items: [
 						{
 							slug: 'tools/gmp-cli',
 							label: 'GMP CLI',

@@ -25,81 +25,32 @@ description: EBench is an indoor VLA manipulation benchmark for long-horizon tas
 
   <p class="doc-intro">
     EBench uses a client–server architecture. The server runs Isaac Sim and exposes the simulation
-    environment as a black box. A minimal client package, with very few dependencies, can be installed
-    into the model's own environment and imported directly to communicate with the server — avoiding
-    dependency conflicts entirely.
+    environment as a black box. A minimal client package can be installed into the model's own
+    environment and imported directly to communicate with the server — avoiding dependency conflicts entirely.
   </p>
 </div>
 
-## What this site covers
+## Read the docs
 
 <div class="feature-cards not-content">
   <div class="feature-card">
-    <h3>Environment setup</h3>
-    <p>Deploy the Isaac Sim server environment and install the lightweight client package into your model's environment.</p>
+    <h3>Task Showcase</h3>
+    <p>Browse video demonstrations of all 26 evaluation tasks across three task families.</p>
   </div>
   <div class="feature-card">
-    <h3>Asset & dataset</h3>
-    <p>Download benchmark assets from Hugging Face into <code>saved/</code>, and access the LeRobot-format training dataset.</p>
+    <h3>Environment & Assets</h3>
+    <p>Set up the Isaac Sim server, install the client package, and download benchmark assets.</p>
   </div>
   <div class="feature-card">
-    <h3>Run evaluation</h3>
-    <p>Start the server, submit jobs via the GMP CLI, and compare model performance across long-horizon, dexterous, and mobile manipulation tasks.</p>
+    <h3>Run & Integrate</h3>
+    <p>Start the server, submit evaluation jobs, and connect your own model.</p>
   </div>
 </div>
 
-## Benchmark scope
-
-Task families:
-
-- Pick-and-Place
-- Long-Horizon
-- Dexterous & Precise
-
-Generalization dimensions:
-
-- unseen objects
-- unseen backgrounds
-- unseen instructions
-- combined unseen setting (`object + background + instruction`)
-
-## Current task settings
-
-- `ebench/mobile_manip/<split>`
-- `ebench/table_top_manip/<split>`
-- `ebench/generalist/<split>`
-
-Supported splits: `val_train`, `val_unseen`, `test`
-
-```bash
-gmp submit ebench/mobile_manip/test
-gmp submit ebench/table_top_manip/val_unseen
-gmp submit ebench/generalist/val_train
-```
-
-## Quick start
-
-1. Clone the repository and set up the Isaac Sim server environment.
-2. Install the `genmanip-client` package into your model environment.
-3. Download assets: `huggingface-cli download InternRobotics/EBench-Assets --local-dir saved --repo-type dataset`.
-4. Start the evaluation server with `ray_eval_server.py`.
-5. Submit a benchmark job with `gmp submit` and inspect results under `saved/eval_results/`.
-
-## Architecture
-
-EBench separates simulation from model inference:
-
-- **Server** — runs Isaac Sim and the benchmark logic. Heavy dependencies (Isaac Sim, cuRobo, etc.) live here.
-- **Client** — a minimal Python package (`genmanip-client`) with very few dependencies. Install it alongside your model, then `import` the communication client to interact with the server.
-
-This design keeps your model environment clean and avoids dependency conflicts between Isaac Sim and your training/inference stack.
-
-## Continue reading
-
 <div class="overview-link-chips">
+  <a class="overview-link-chip" href="/evaluation/task-showcase/">Task Showcase</a>
   <a class="overview-link-chip" href="/getting-started/environment/">Environment Setup</a>
   <a class="overview-link-chip" href="/getting-started/assets/">Asset & Dataset</a>
   <a class="overview-link-chip" href="/evaluation/run-benchmark/">Run Evaluation</a>
   <a class="overview-link-chip" href="/evaluation/custom-model/">Integrate Your Own Model</a>
-  <a class="overview-link-chip" href="/tools/gmp-cli/">GMP CLI</a>
 </div>
