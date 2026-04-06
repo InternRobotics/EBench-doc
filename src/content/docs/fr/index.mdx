@@ -1,0 +1,56 @@
+---
+title: "Qu'est-ce qu'EBench"
+description: EBench est un benchmark de manipulation VLA en environnement intérieur couvrant les tâches à long horizon, la manipulation fine et la manipulation mobile.
+---
+
+<div class="overview-shell">
+  <div class="hero-section">
+    <div class="hero-content">
+      <img src="/brand-mark.svg" alt="EBench" class="hero-logo" />
+      <div class="hero-title">EBENCH</div>
+      <p class="hero-tagline">Benchmark de manipulation VLA en intérieur pour les tâches à long horizon, la manipulation fine et la manipulation mobile</p>
+    </div>
+  </div>
+
+  <p class="doc-social-line"><strong>Code :</strong> <a href="https://github.com/InternRobotics/GenManip" target="_blank" rel="noreferrer">InternRobotics/GenManip</a></p>
+  <p class="doc-social-line"><strong>Assets :</strong> <a href="https://huggingface.co/datasets/InternRobotics/EBench-Assets" target="_blank" rel="noreferrer">InternRobotics/EBench-Assets</a></p>
+  <p class="doc-social-line"><strong>Jeu de données :</strong> <a href="https://huggingface.co/datasets/InternRobotics/EBench-Dataset" target="_blank" rel="noreferrer">InternRobotics/EBench-Dataset</a> (format LeRobot)</p>
+  <div class="doc-divider"></div>
+
+  <p class="doc-intro">
+    EBench (Embodied Benchmark) est un benchmark de manipulation VLA en intérieur construit sur NVIDIA Isaac Sim.
+    Il couvre les tâches à long horizon, la manipulation fine et la manipulation mobile, permettant une comparaison
+    équitable et efficace des capacités des modèles sur des tâches incarnées exigeantes.
+  </p>
+
+  <p class="doc-intro">
+    EBench repose sur une architecture client-serveur. Le serveur exécute Isaac Sim et expose l'environnement
+    de simulation comme une boîte noire. Un paquet client léger peut être installé dans l'environnement du modèle
+    et importé directement pour communiquer avec le serveur, éliminant ainsi tout conflit de dépendances.
+  </p>
+</div>
+
+## Consulter la documentation
+
+<div class="feature-cards not-content">
+  <div class="feature-card">
+    <h3>Démonstrations</h3>
+    <p>Parcourez les vidéos de démonstration des 26 tâches d'évaluation réparties en trois familles.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Environnement et assets</h3>
+    <p>Configurez le serveur Isaac Sim, installez le paquet client et téléchargez les assets du benchmark.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Exécution et intégration</h3>
+    <p>Démarrez le serveur, soumettez des tâches d'évaluation et connectez votre propre modèle.</p>
+  </div>
+</div>
+
+<div class="overview-link-chips">
+  <a class="overview-link-chip" href="/fr/evaluation/task-showcase/">Démonstrations</a>
+  <a class="overview-link-chip" href="/fr/getting-started/environment/">Configuration de l'environnement</a>
+  <a class="overview-link-chip" href="/fr/getting-started/assets/">Assets et données</a>
+  <a class="overview-link-chip" href="/fr/evaluation/run-benchmark/">Lancer l'évaluation</a>
+  <a class="overview-link-chip" href="/fr/evaluation/custom-model/">Intégrer votre modèle</a>
+</div>

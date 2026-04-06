@@ -1,0 +1,52 @@
+---
+title: EBenchとは
+description: EBench は室内 VLA マニピュレーションベンチマークで、ロングホライズンタスク、精密操作、モバイルマニピュレーションに対応しています。
+---
+
+<div class="overview-shell">
+  <div class="hero-section">
+    <div class="hero-content">
+      <img src="/brand-mark.svg" alt="EBench" class="hero-logo" />
+      <div class="hero-title">EBENCH</div>
+      <p class="hero-tagline">室内 VLA マニピュレーションベンチマーク：ロングホライズン・精密操作・モバイルマニピュレーション</p>
+    </div>
+  </div>
+
+  <p class="doc-social-line"><strong>コード：</strong><a href="https://github.com/InternRobotics/GenManip" target="_blank" rel="noreferrer">InternRobotics/GenManip</a></p>
+  <p class="doc-social-line"><strong>アセット：</strong><a href="https://huggingface.co/datasets/InternRobotics/EBench-Assets" target="_blank" rel="noreferrer">InternRobotics/EBench-Assets</a></p>
+  <p class="doc-social-line"><strong>データセット：</strong><a href="https://huggingface.co/datasets/InternRobotics/EBench-Dataset" target="_blank" rel="noreferrer">InternRobotics/EBench-Dataset</a>（LeRobot 形式）</p>
+  <div class="doc-divider"></div>
+
+  <p class="doc-intro">
+    EBench（Embodied Benchmark）は NVIDIA Isaac Sim 上に構築された室内 VLA マニピュレーションベンチマークです。ロングホライズンタスク、精密操作、モバイルマニピュレーションをカバーし、高難度の身体性タスクにおけるモデル性能を公平かつ効率的に比較できます。
+  </p>
+
+  <p class="doc-intro">
+    EBench はクライアント・サーバーアーキテクチャを採用しています。サーバー側では Isaac Sim を実行し、シミュレーション環境をブラックボックスとして公開します。クライアント側は依存関係が極めて少ない軽量パッケージで、モデル側の環境に直接インストールして import するだけでサーバーと通信でき、依存関係の競合を完全に回避します。
+  </p>
+</div>
+
+## ドキュメントを読む
+
+<div class="feature-cards not-content">
+  <div class="feature-card">
+    <h3>タスク一覧</h3>
+    <p>3 つのタスクファミリー全 26 評価タスクの動画デモをご覧ください。</p>
+  </div>
+  <div class="feature-card">
+    <h3>環境とアセット</h3>
+    <p>Isaac Sim サーバーの構築、クライアントパッケージのインストール、ベンチマークアセットのダウンロード。</p>
+  </div>
+  <div class="feature-card">
+    <h3>実行と統合</h3>
+    <p>サーバーの起動、評価ジョブの送信、独自モデルの接続。</p>
+  </div>
+</div>
+
+<div class="overview-link-chips">
+  <a class="overview-link-chip" href="/ja/evaluation/task-showcase/">タスク一覧</a>
+  <a class="overview-link-chip" href="/ja/getting-started/environment/">環境構築</a>
+  <a class="overview-link-chip" href="/ja/getting-started/assets/">アセットとデータセット</a>
+  <a class="overview-link-chip" href="/ja/evaluation/run-benchmark/">評価の実行</a>
+  <a class="overview-link-chip" href="/ja/evaluation/custom-model/">モデルの統合</a>
+</div>
