@@ -108,8 +108,6 @@ finally:
 
 ## `EvalClient` interface
 
-The `EvalClient` API below is based on `GenManip-Sim/standalone_tools/packages/genmanip_client/src/genmanip_client/eval_client.py`.
-
 ### Constructor
 
 | Interface | Description |
@@ -127,12 +125,6 @@ Constructor parameter notes:
 - `web_view*`: lightweight browser preview options
 - `frame_save_interval`: save one local visualization frame every N environment steps; useful for debugging while keeping disk usage under control
 - `plot_on_episode_end`: automatically run `gmp plot` for each finished episode; useful when debugging failed episodes or inspecting action/state traces
-
-Recommended for debug use:
-
-- Set `frame_save_interval=10` or `20` for lightweight periodic snapshots
-- Enable `plot_on_episode_end=True` when you want automatic per-episode plots
-- For large benchmark runs, prefer `frame_save_interval=0` and `plot_on_episode_end=False` to reduce local I/O overhead
 
 ### Public methods
 

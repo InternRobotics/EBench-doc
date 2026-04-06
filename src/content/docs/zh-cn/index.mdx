@@ -1,6 +1,6 @@
 ---
 title: 什么是 EBench
-description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具身操作评测基准。
+description: EBench 是一个室内 VLA 操作基准，涵盖长程任务、灵巧操作与移动操作。
 ---
 
 <div class="overview-shell">
@@ -8,18 +8,17 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
     <div class="hero-content">
       <img src="/brand-mark.svg" alt="EBench" class="hero-logo" />
       <div class="hero-title">EBENCH</div>
-      <p class="hero-tagline">基于 Isaac Sim 的多维度具身操作评测基准</p>
+      <p class="hero-tagline">室内 VLA 操作基准：长程任务、灵巧操作与移动操作</p>
     </div>
   </div>
 
-  <p class="doc-social-line"><strong>Benchmark 仓库：</strong><a href="https://gitee.pjlab.org.cn/L2/SimPlatform/EBench.git" target="_blank" rel="noreferrer">L2/SimPlatform/EBench</a></p>
-  <p class="doc-social-line"><strong>Infra 仓库：</strong>GenManip-Sim（server）+ GenManip-Client（client 包）。</p>
+  <p class="doc-social-line"><strong>代码仓库：</strong><a href="https://github.com/InternRobotics/GenManip" target="_blank" rel="noreferrer">InternRobotics/GenManip</a></p>
+  <p class="doc-social-line"><strong>资产仓库：</strong><a href="https://huggingface.co/datasets/InternRobotics/EBench-Assets" target="_blank" rel="noreferrer">InternRobotics/EBench-Assets</a></p>
+  <p class="doc-social-line"><strong>训练数据集：</strong><a href="https://huggingface.co/datasets/InternRobotics/EBench-Dataset" target="_blank" rel="noreferrer">InternRobotics/EBench-Dataset</a>（LeRobot 格式）</p>
   <div class="doc-divider"></div>
 
   <p class="doc-intro">
-    EBench 是一个基于 Isaac Sim 的具身操作评测基准，联合评估多个能力维度：
-    Pick-and-Place、Long-Horizon 和 Dexterous &amp; Precise 操作。官方使用路径基于
-    GenManip 的 client-server 工作流。
+    EBench（Embodied Benchmark）是一个基于 NVIDIA Isaac Sim 的室内 VLA 操作基准，涵盖长程任务、灵巧操作以及移动操作，旨在公平高效地比较模型在更具挑战性的任务上的能力。
   </p>
 
   <p class="doc-intro">
@@ -27,32 +26,20 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
   </p>
 </div>
 
-## 仓库分工
-
-- `EBench`：benchmark 数据、轨迹与打包资产。
-- `GenManip-Sim`：评测服务端、benchmark task 配置，以及默认承载 `saved/` 的项目根目录。
-- `genmanip-client`：从 `GenManip-Sim/standalone_tools/packages/genmanip_client/` 安装的 client 包，提供 `gmp` 和 `EvalClient`。
-
-## 运行位置
-
-- `ray_eval_server.py` 需要在 `GenManip-Sim/` 仓库根目录运行。
-- `gmp` 需要在已安装 `genmanip-client` 的 client 环境中运行。
-- benchmark 数据需要映射到 `GenManip-Sim/saved/`，可以直接放置，也可以把 `EBench/` 软链接到该路径。
-
 ## 这套文档包含什么
 
 <div class="feature-cards not-content">
   <div class="feature-card">
     <h3>环境配置</h3>
-    <p>准备 Isaac Sim + GenManip-Sim 的 server 依赖，以及独立的 client 推理环境。</p>
+    <p>部署 Isaac Sim server 环境，并在模型环境中安装轻量的 client 包。</p>
   </div>
   <div class="feature-card">
-    <h3>数据与资产</h3>
-    <p>拉取 EBench 数据与任务资产，并放在 <code>saved/</code> 下（或软链接到该路径）用于评测。</p>
+    <h3>资产与数据集</h3>
+    <p>从 Hugging Face 下载评测资产到 <code>saved/</code>，以及获取 LeRobot 格式的训练数据集。</p>
   </div>
   <div class="feature-card">
-    <h3>评测流程</h3>
-    <p>启动 Ray eval server，用 <code>gmp submit</code> 提交任务，运行 worker/client，再用 <code>gmp status</code> 查看进度。</p>
+    <h3>运行评测</h3>
+    <p>启动 server、通过 GMP CLI 提交任务，在长程、灵巧和移动操作任务上比较模型表现。</p>
   </div>
 </div>
 
@@ -64,18 +51,12 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
 - Long-Horizon
 - Dexterous & Precise
 
-当前设置中的泛化维度：
+泛化维度：
 
 - 未见物体（unseen objects）
 - 未见背景（unseen backgrounds）
 - 未见指令（unseen instructions）
 - 组合未见设置（`object + background + instruction`）
-
-## Infra 组成
-
-1. `EBench` 数据集：轨迹、评测任务和场景资产。
-2. `GenManip-Sim` server：基于 Ray 的仿真评测调度。
-3. `genmanip-client` 包：模型侧接入使用的 CLI 和 EvalClient API。
 
 ## 当前可提交的任务设置
 
@@ -83,13 +64,7 @@ description: EBench 是一个基于 Isaac Sim 与 GenManip Infra 的多维度具
 - `ebench/table_top_manip/<split>`
 - `ebench/generalist/<split>`
 
-支持的 `split`：
-
-- `val_train`
-- `val_unseen`
-- `test`
-
-示例：
+支持的 split：`val_train`、`val_unseen`、`test`
 
 ```bash
 gmp submit ebench/mobile_manip/test
@@ -97,20 +72,28 @@ gmp submit ebench/table_top_manip/val_unseen
 gmp submit ebench/generalist/val_train
 ```
 
-## 端到端流程
+## 快速开始
 
-1. 准备环境并安装 server/client 依赖。
-2. 拉取 EBench 数据并映射到 `saved/`。
-3. 启动 `ray_eval_server.py`。
-4. 通过 `gmp submit` 提交一个或多个评测配置。
-5. 运行 client worker（`gmp eval` 或自定义 EvalClient 循环）。
-6. 用 `gmp status` 跟踪进度，并在 `saved/eval_results/` 查看结果。
+1. 克隆仓库并配置 Isaac Sim server 环境。
+2. 在模型环境中安装 `genmanip-client`。
+3. 下载资产：`huggingface-cli download InternRobotics/EBench-Assets --local-dir saved --repo-type dataset`。
+4. 启动评测服务 `ray_eval_server.py`。
+5. 用 `gmp submit` 提交任务，结果在 `saved/eval_results/` 中查看。
+
+## 架构设计
+
+EBench 将仿真和模型推理分离：
+
+- **Server** — 运行 Isaac Sim 和评测逻辑，重依赖（Isaac Sim、cuRobo 等）集中在此。
+- **Client** — 一个极轻量的 Python 包（`genmanip-client`），依赖极少。安装到模型环境后直接 `import` 通信 client 即可与 Server 交互。
+
+这样模型环境保持干净，不会出现 Isaac Sim 和训练/推理栈之间的依赖冲突。
 
 ## 继续阅读
 
 <div class="overview-link-chips">
   <a class="overview-link-chip" href="/zh-cn/getting-started/environment/">环境配置</a>
-  <a class="overview-link-chip" href="/zh-cn/getting-started/assets/">数据与资产</a>
+  <a class="overview-link-chip" href="/zh-cn/getting-started/assets/">资产与数据集</a>
   <a class="overview-link-chip" href="/zh-cn/evaluation/run-benchmark/">运行评测</a>
   <a class="overview-link-chip" href="/zh-cn/evaluation/custom-model/">接入自定义模型</a>
   <a class="overview-link-chip" href="/zh-cn/tools/gmp-cli/">GMP CLI</a>

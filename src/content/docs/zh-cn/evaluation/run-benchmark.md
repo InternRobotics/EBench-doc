@@ -1,25 +1,23 @@
 ---
 title: 运行评测
-description: 使用 GenManip 的 server/client 工作流端到端运行 EBench。
+description: 启动 Isaac Sim server 并完整跑通一次 EBench 评测任务。
 ---
 
-## 1. 启动评测服务
+## 1. 启动 Server
 
-以下命令需要在 `GenManip-Sim/` 仓库根目录运行。
-
-如果你用的是本机 Isaac Sim 安装，使用 Isaac Sim Python：
+Server 端运行 Isaac Sim 并暴露仿真环境。如果你使用的是本地安装的 Isaac Sim，优先使用它自带的 Python 启动器：
 
 ```bash
-/isaac-sim/python.sh ray_eval_server.py --host 0.0.0.0 --port 8087 --episode_recorder_save_every 0
+/isaac-sim/python.sh ray_eval_server.py --host 0.0.0.0 --port 8087
 ```
 
-如果当前环境已经装好了 Isaac Sim 的 Python 包，也可以直接运行：
+如果当前环境已经通过 pip 安装了 Isaac Sim：
 
 ```bash
-python ray_eval_server.py --host 0.0.0.0 --port 8087 --episode_recorder_save_every 0
+python ray_eval_server.py --host 0.0.0.0 --port 8087
 ```
 
-快速联调（更短 horizon）可用：
+快速联调（更短 horizon，50 步）：
 
 ```bash
 /isaac-sim/python.sh ray_eval_server.py -n 50
@@ -27,32 +25,44 @@ python ray_eval_server.py --host 0.0.0.0 --port 8087 --episode_recorder_save_eve
 
 ## 2. 提交评测任务
 
-`gmp` 需要在已安装 `genmanip-client` 的 client 环境中运行。
-
-对 EBench 来说，最清晰的公共入口是 benchmark 别名，以及 benchmark family + split 路径。
+Server 启动后，在 **client 环境**中提交评测任务：
 
 ```bash
 gmp submit ebench/mobile_manip/test --run_id local_smoke_test
 gmp submit ebench/table_top_manip/val_unseen --run_id tabletop_val_unseen
 gmp submit ebench/generalist/val_train --run_id generalist_val_train
-gmp submit ebench --run_id full_ebench
 ```
+
+`gmp submit` 支持多种写法：
+
+- 完整配置文件路径
+- 简写 benchmark ID，例如 `ebench`
+- 更细的路径，例如 `ebench/simple_pnp`
 
 `gmp` 默认连接 `127.0.0.1:8087`，也可以覆盖：
 
 ```bash
-gmp submit ebench/mobile_manip/val_unseen --host 10.150.129.227 --port 8086
+gmp submit ebench/mobile_manip/val_unseen --host <server_ip> --port 8087
 ```
 
-## 3. 启动 client worker
+## 3. 接入模型
 
-使用简单基线策略做快速验证：
+如果只是做联通性检查，可以用内置的 baseline policy：
 
 ```bash
 gmp eval -a r5a -g lift2 --worker_ids 0 --host 127.0.0.1 --port 8087 --frame_save_interval 10
 ```
 
-接入自定义模型时，建议在自己的循环中使用 `EvalClient`（`reset -> step -> done`），并在 `get_action(obs)` 中调用模型推理。输入输出格式和最小 `ModelClient` 示例见[接入自定义模型](/zh-cn/evaluation/custom-model/)。客户端源码和示例位于 `GenManip-Sim/standalone_tools/packages/genmanip_client/`。
+正式评测时，在模型代码中直接 import client：
+
+```python
+from genmanip_client.eval_client import EvalClient
+
+client = EvalClient(base_url="http://127.0.0.1:8087", worker_ids=["0"], run_id="my_run")
+# 通过 client 接收观测、发送动作
+```
+
+输入输出格式和最小 `ModelClient` 示例见[接入自定义模型](/zh-cn/evaluation/custom-model/)。
 
 ## 4. 查看进度和结果
 
@@ -79,4 +89,3 @@ gmp status
 
 - 建议加 `--episode_recorder_save_every 0` 以减少 server 侧存图开销。
 - 当模型按 chunk 预测动作时，可使用 `gmp eval --chunk_size <N>`。
-- 在线 leaderboard 提交是可选流程，见 CLI 页面。

@@ -1,85 +1,71 @@
 ---
 title: Environment Setup
-description: Prepare GenManip server/client environments for EBench evaluation.
+description: Set up the Isaac Sim server environment and the lightweight client package for EBench.
 ---
 
-## Component overview
+EBench uses a client–server architecture. You will set up **two environments**:
 
-- `GenManip-Sim` provides the eval server entrypoint `ray_eval_server.py` and benchmark task configs.
-- `genmanip-client` provides the `gmp` CLI and `EvalClient` API.
-- `EBench` provides benchmark data and assets that are expected under `GenManip-Sim/saved/`.
+- **Server environment** — Isaac Sim, cuRobo, and the benchmark code.
+- **Client environment** — just `genmanip-client` alongside your model dependencies. This package has very few dependencies to avoid conflicts.
 
 ## Prerequisites
 
-- Linux workstation or cluster node with NVIDIA GPU.
-- CUDA 12.1 compatible environment.
-- Isaac Sim 4.1 runtime (`/isaac-sim/python.sh` or pip-based Isaac Sim packages).
-- Git and (for dataset pull) DVC.
+- Linux workstation with an NVIDIA GPU.
+- CUDA 12.1 and a compatible driver.
+- An Isaac Sim 4.1.0 compatible Python environment (for the server).
+- `git-lfs` for large asset tracking.
 
-## 1. Clone benchmark and infra repositories
+## Clone the repository
 
 ```bash
-git clone --recursive -b feature/pioneer https://gitee.pjlab.org.cn/L2/MultimodalVLA/GenManip-Sim.git
-git clone https://gitee.pjlab.org.cn/L2/SimPlatform/EBench.git
+git clone https://github.com/InternRobotics/GenManip.git
+cd GenManip
 ```
 
-## 2. Install server-side dependencies
+## Server environment
 
-Run this in the environment that will launch `ray_eval_server.py`:
+### Install Isaac Sim
+
+The current setup uses Isaac Sim `4.1.0`, CUDA `12.1`, and Torch `2.4.0`:
 
 ```bash
-/isaac-sim/python.sh -m pip install -r GenManip-Sim/requirements.txt
+export CUDA_HOME=/usr/local/cuda-12.1
+pip install isaacsim==4.1.0 isaacsim-extscache-kit==4.1.0 isaacsim-extscache-kit-sdk==4.1.0 isaacsim-extscache-physics==4.1.0 --extra-index-url https://pypi.nvidia.com
+pip install torch==2.4.0 --extra-index-url https://download.pytorch.org/whl/cu121
+sudo apt install git-lfs
 ```
 
-If you are using a pure Python environment with Isaac Sim wheels, use `python -m pip` instead.
+If you have a local Isaac Sim installation, you can use it directly — just run server-side commands with `/isaac-sim/python.sh` instead.
 
-## 3. Install client package in model environment
+### Install project dependencies
 
-Install `gmp` from the package source inside `GenManip-Sim`:
+EBench depends on `cuRobo` and the repository requirements:
 
 ```bash
-pip install -e GenManip-Sim/standalone_tools/packages/genmanip_client/
+mkdir -p saved/envs
+git clone https://github.com/NVlabs/curobo.git saved/envs/curobo
+pip install -e saved/envs/curobo --no-build-isolation
+pip install -r requirements.txt
+```
+
+## Client environment
+
+The client package is intentionally minimal so it can coexist with your model's dependencies without conflicts.
+
+```bash
+pip install -e standalone_tools/packages/genmanip_client/
 gmp --help
 ```
 
-Recommended split:
+Once installed, you can `import` the communication client directly in your model code to interact with the server.
 
-- Server env: Isaac Sim + GenManip-Sim runtime dependencies.
-- Client env: `genmanip-client` + model inference dependencies.
+## Quick sanity check
 
-## 4. Pull EBench dataset
+Before downloading assets or starting an evaluation, verify:
 
-```bash
-cd EBench
-pip install "dvc[oss,s3]"
-dvc pull
-cd ..
-ln -s EBench GenManip-Sim/saved
-```
-
-After this step, `GenManip-Sim/saved/` should expose the benchmark assets and become the default location for evaluation outputs such as `saved/eval_results/`.
-
-## 5. Verify environment
-
-Terminal 1 (server):
-
-```bash
-cd GenManip-Sim
-/isaac-sim/python.sh ray_eval_server.py 
-```
-
-Terminal 2 (client):
-
-```bash
-cd /path/to/your/client-env
-gmp submit ebench/mobile_manip/test
-```
-
-If submit succeeds, start one worker:
-
-```bash
-gmp eval -a r5a -g lift2 --worker_ids 0
-```
+- `saved/` exists in the repository root.
+- `gmp --help` works in the client environment.
+- `python ray_eval_server.py --help` or `/isaac-sim/python.sh ray_eval_server.py --help` works in the server environment.
 
 ## Network reminder
 

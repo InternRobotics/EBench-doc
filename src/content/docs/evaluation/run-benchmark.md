@@ -1,19 +1,17 @@
 ---
 title: Run Evaluation
-description: Run EBench end to end with GenManip server/client workflow.
+description: Start the Isaac Sim server and run an EBench evaluation end to end.
 ---
 
-## 1. Start the evaluation server
+## 1. Start the server
 
-Run these commands from the `GenManip-Sim/` repository root.
-
-Use Isaac Sim Python if you run from a local Isaac Sim installation:
+The server runs Isaac Sim and exposes the simulation environment. Use the bundled Python launcher if you have a local Isaac Sim installation:
 
 ```bash
 /isaac-sim/python.sh ray_eval_server.py --host 0.0.0.0 --port 8087
 ```
 
-Or run directly in an environment where Isaac Sim packages are already installed:
+If your current environment already has Isaac Sim installed via pip:
 
 ```bash
 python ray_eval_server.py --host 0.0.0.0 --port 8087
@@ -27,9 +25,7 @@ Quick smoke-test option (shorter horizon, 50 steps per episode):
 
 ## 2. Submit benchmark tasks
 
-Run `gmp` from the client environment where `genmanip-client` is installed.
-
-`gmp submit` accepts benchmark aliases and benchmark-family split paths. Those are the cleanest public-facing entrypoints for EBench.
+With the server running, submit a benchmark job from the **client environment**:
 
 ```bash
 gmp submit ebench/mobile_manip/test --run_id local_smoke_test
@@ -37,21 +33,35 @@ gmp submit ebench/table_top_manip/val_unseen --run_id tabletop_val_unseen
 gmp submit ebench/generalist/val_train --run_id generalist_val_train
 ```
 
-By default, `gmp` connects to `127.0.0.1:8087`. Override target if needed:
+`gmp submit` accepts benchmark aliases and benchmark-family split paths:
+
+- shorthand benchmark IDs such as `ebench`
+- narrower paths such as `ebench/simple_pnp`
+
+By default, `gmp` connects to `127.0.0.1:8087`. Override if needed:
 
 ```bash
-gmp submit ebench/mobile_manip/val_unseen --host 10.150.129.227 --port 8086
+gmp submit ebench/mobile_manip/val_unseen --host <server_ip> --port 8087
 ```
 
-## 3. Start client workers
+## 3. Connect your model
 
-For quick validation with a simple baseline policy:
+For a quick connectivity check, use the built-in baseline policy:
 
 ```bash
-gmp eval -a r5a -g lift2 --worker_ids 0 --host 127.0.0.1 --port 8087 --frame_save_interval 10 --plot_on_episode_end
+gmp eval -a r5a -g lift2 --worker_ids 0 --host 127.0.0.1 --port 8087 --frame_save_interval 10
 ```
 
-For custom model integration, use `EvalClient` in your own loop (`reset -> step -> done`) and call your model in `get_action(obs)`. See [Integrate Your Own Model](/evaluation/custom-model/) for the input/output schema and a minimal `ModelClient` example. The client package source and examples live under `GenManip-Sim/standalone_tools/packages/genmanip_client/`.
+For real evaluation, import the client in your model code:
+
+```python
+from genmanip_client.eval_client import EvalClient
+
+client = EvalClient(base_url="http://127.0.0.1:8087", worker_ids=["0"], run_id="my_run")
+# Use client to receive observations and send actions
+```
+
+See [Integrate Your Own Model](/evaluation/custom-model/) for the full input/output schema and a minimal `ModelClient` example.
 
 ## 4. Check progress and outputs
 
@@ -78,4 +88,4 @@ gmp status
 
 - Use `--episode_recorder_save_every 0` to reduce server image dump overhead.
 - `gmp eval --chunk_size <N>` can be used when your model outputs action chunks.
-- Online leaderboard submission is optional and is documented in the `gmp` CLI page.
+- Setting `--episode_recorder_save_every 0` on the server reduces overhead when you do not need image dumps.

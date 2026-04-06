@@ -5,7 +5,7 @@ description: 使用 gmp 提交、跟踪、运行和后处理 EBench 评测任务
 
 ## 安装
 
-从 `GenManip-Sim` 的源码目录安装：
+在 **client 环境**中安装 `genmanip-client`：
 
 ```bash
 pip install -e standalone_tools/packages/genmanip_client/
@@ -22,8 +22,6 @@ gmp --help
 | [`gmp plot`](#gmp-plot) | 对 episode 输出做后处理可视化。 |
 | [`gmp clean`](#gmp-clean) | 清理生成的缓存、日志、评测输出和临时残留文件。 |
 | [`gmp visualize`](#gmp-visualize) | 浏览评测结果，并在 Rerun viewer 中回放 episode。 |
-| [`gmp online`](#gmp-online) | 把本地模型接到远端在线评测服务。 |
-| [`gmp leaderboard`](#gmp-leaderboard-optional) | 列出或提交内部排行榜使用的 run。 |
 
 ## 提交、查看与评测
 
@@ -108,18 +106,16 @@ gmp clean --all
 
 `gmp visualize` 会启动一个本地 HTTPS viewer，用来浏览 run、查看 task 成功率，并回放单个 episode。
 
-先进入 `genmanip_client` 包目录，再安装 visualize 额外依赖：
+安装 visualize 额外依赖：
 
 ```bash
-cd GenManip-Sim/standalone_tools/packages/genmanip_client/
-pip install -e ".[visualize]"
+pip install -e "standalone_tools/packages/genmanip_client/[visualize]"
 ```
 
 基本用法：
 
 ```bash
 gmp visualize
-gmp visualize --project_root /path/to/GenManip-Sim
 gmp visualize --port 55088
 ```
 
@@ -135,90 +131,6 @@ gmp visualize --flush-cache
 - `gmp visualize` 默认读取 `saved/eval_results/` 下的结果。
 - 由于 viewer 使用 HTTPS，浏览器第一次打开时可能会出现一次证书提示。
 - 当前 visualize 依赖的 `rerun-sdk` 路径要求 Python 3.11+。
-
-## 在线服务与排行榜
-
-### `gmp online`
-
-当模型在本地运行、而评测资源由远端 GenManip 服务分配时，使用 `online` 子命令。
-
-仅创建在线任务、不等待资源就绪：
-
-```bash
-gmp online create \
-  --base_url https://example.com \
-  --token YOUR_TOKEN \
-  --task_id T2025123100001 \
-  --model_name internVLA \
-  --model_type VLA \
-  --benchmark_set EBench
-```
-
-检查已有任务是否就绪：
-
-```bash
-gmp online ready \
-  --base_url https://example.com \
-  --token YOUR_TOKEN \
-  --task_id T2025123100001
-```
-
-创建任务并等待 endpoint 就绪：
-
-```bash
-gmp online submit \
-  --base_url https://example.com \
-  --token YOUR_TOKEN \
-  --task_id T2025123100001 \
-  --model_name internVLA \
-  --model_type VLA \
-  --benchmark_set EBench
-```
-
-适合脚本接入的工作流：
-
-```bash
-resp=$(gmp online submit \
-  --base_url https://example.com \
-  --token YOUR_TOKEN \
-  --task_id T2025123100001 \
-  --model_name internVLA \
-  --model_type VLA \
-  --benchmark_set EBench \
-  --print_endpoint)
-
-GMP_ONLINE_URL=$(printf '%s' "$resp" | jq -r '.endpoint')
-TASK_ID=$(printf '%s' "$resp" | jq -r '.task_id')
-
-gmp eval --url "$GMP_ONLINE_URL" --run_id "$TASK_ID" --token YOUR_TOKEN
-```
-
-说明：
-
-- `gmp online create` 只负责创建任务记录。
-- `gmp online submit` 默认会持续轮询直到 endpoint 就绪。
-- `gmp online ready` 可用于轮询已有任务。
-- `task_id` 通常也作为本地 `run_id` 使用。
-
-### `gmp leaderboard`（可选）
-
-如果你使用的是内部在线评测服务，`gmp` 还提供 leaderboard 相关命令。若这部分不面向公开用户，建议转移到内部文档。
-
-列出本地 run：
-
-```bash
-export GENMANIP_ENABLE_INTERNAL=1
-gmp leaderboard list --project_root /path/to/GenManip-Sim
-```
-
-提交一个 run：
-
-```bash
-export LEADERBOARD_HOST="10.150.136.13"
-export LEADERBOARD_PORT="55041"
-export USER_TOKEN="user_token_here"
-gmp leaderboard submit --run_id "testtest" -n "My Best Model" -l "EBench" --project_root /path/to/GenManip-Sim
-```
 
 ## 常用参数
 

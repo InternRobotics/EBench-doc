@@ -76,8 +76,8 @@ export default defineConfig({
 						},
 						{
 							slug: 'getting-started/assets',
-							label: 'Dataset and Assets',
-							translations: { 'zh-CN': '数据与资产' },
+							label: 'Asset & Dataset',
+							translations: { 'zh-CN': '资产与数据集' },
 						},
 					],
 				},
@@ -85,6 +85,11 @@ export default defineConfig({
 					label: 'Evaluation',
 					translations: { 'zh-CN': '评测' },
 					items: [
+						{
+							slug: 'evaluation/task-showcase',
+							label: 'Task Showcase',
+							translations: { 'zh-CN': '任务展示' },
+						},
 						{
 							slug: 'evaluation/run-benchmark',
 							label: 'Run Evaluation',

@@ -1,6 +1,6 @@
 ---
 title: What Is EBench
-description: EBench is a multi-dimensional embodied manipulation benchmark built on Isaac Sim and the GenManip evaluation stack.
+description: EBench is an indoor VLA manipulation benchmark for long-horizon tasks, dexterous manipulation, and mobile manipulation.
 ---
 
 <div class="overview-shell">
@@ -8,18 +8,19 @@ description: EBench is a multi-dimensional embodied manipulation benchmark built
     <div class="hero-content">
       <img src="/brand-mark.svg" alt="EBench" class="hero-logo" />
       <div class="hero-title">EBENCH</div>
-      <p class="hero-tagline">Multi-dimensional embodied manipulation benchmark built on Isaac Sim</p>
+      <p class="hero-tagline">Indoor VLA manipulation benchmark for long-horizon, dexterous, and mobile manipulation</p>
     </div>
   </div>
 
-  <p class="doc-social-line"><strong>Benchmark repo:</strong> <a href="https://gitee.pjlab.org.cn/L2/SimPlatform/EBench.git" target="_blank" rel="noreferrer">L2/SimPlatform/EBench</a></p>
-  <p class="doc-social-line"><strong>Infra repos:</strong> GenManip-Sim (server) + GenManip-Client (client package).</p>
+  <p class="doc-social-line"><strong>Code:</strong> <a href="https://github.com/InternRobotics/GenManip" target="_blank" rel="noreferrer">InternRobotics/GenManip</a></p>
+  <p class="doc-social-line"><strong>Assets:</strong> <a href="https://huggingface.co/datasets/InternRobotics/EBench-Assets" target="_blank" rel="noreferrer">InternRobotics/EBench-Assets</a></p>
+  <p class="doc-social-line"><strong>Dataset:</strong> <a href="https://huggingface.co/datasets/InternRobotics/EBench-Dataset" target="_blank" rel="noreferrer">InternRobotics/EBench-Dataset</a> (LeRobot format)</p>
   <div class="doc-divider"></div>
 
   <p class="doc-intro">
-    EBench is an Isaac Sim based embodied manipulation benchmark that evaluates multiple
-    capability dimensions together: Pick-and-Place, Long-Horizon tasks, and Dexterous &amp; Precise
-    manipulation. The supported usage path is built on GenManip&apos;s client-server workflow.
+    EBench (Embodied Benchmark) is an indoor VLA manipulation benchmark built on NVIDIA Isaac Sim.
+    It covers long-horizon tasks, dexterous manipulation, and mobile manipulation, enabling fair and
+    efficient comparison of model capabilities on challenging embodied tasks.
   </p>
 
   <p class="doc-intro">
@@ -30,32 +31,20 @@ description: EBench is a multi-dimensional embodied manipulation benchmark built
   </p>
 </div>
 
-## Repository roles
-
-- `EBench`: benchmark data, trajectories, and packaged assets.
-- `GenManip-Sim`: the evaluation server, benchmark task configs, and the project root that expects `saved/`.
-- `genmanip-client`: provides `gmp` CLI and the `EvalClient` API for model-side integration.
-
-## Working directories
-
-- Run `ray_eval_server.py` from the `GenManip-Sim/` repository root.
-- Install and run `gmp` from your client environment after installing `genmanip-client`.
-- Keep benchmark data available under `GenManip-Sim/saved/`, either by placing files there directly or symlinking `EBench/` to that path.
-
 ## What this site covers
 
 <div class="feature-cards not-content">
   <div class="feature-card">
     <h3>Environment setup</h3>
-    <p>Prepare Isaac Sim + GenManip-Sim server dependencies and a separated client environment for model inference.</p>
+    <p>Deploy the Isaac Sim server environment and install the lightweight client package into your model's environment.</p>
   </div>
   <div class="feature-card">
-    <h3>Dataset and assets</h3>
-    <p>Pull EBench assets and task data, then place them under <code>saved/</code> (or symlink to that path) for evaluation.</p>
+    <h3>Asset & dataset</h3>
+    <p>Download benchmark assets from Hugging Face into <code>saved/</code>, and access the LeRobot-format training dataset.</p>
   </div>
   <div class="feature-card">
-    <h3>Evaluation workflow</h3>
-    <p>Start Ray eval server, submit benchmark configs with <code>gmp submit</code>, run workers/clients, and check progress with <code>gmp status</code>.</p>
+    <h3>Run evaluation</h3>
+    <p>Start the server, submit jobs via the GMP CLI, and compare model performance across long-horizon, dexterous, and mobile manipulation tasks.</p>
   </div>
 </div>
 
@@ -67,26 +56,20 @@ Task families:
 - Long-Horizon
 - Dexterous & Precise
 
-Generalization dimensions in current settings:
+Generalization dimensions:
 
 - unseen objects
 - unseen backgrounds
 - unseen instructions
 - combined unseen setting (`object + background + instruction`)
 
-## Current task settings (for submit)
+## Current task settings
 
 - `ebench/mobile_manip/<split>`
 - `ebench/table_top_manip/<split>`
 - `ebench/generalist/<split>`
 
-Supported splits:
-
-- `val_train`
-- `val_unseen`
-- `test`
-
-Examples:
+Supported splits: `val_train`, `val_unseen`, `test`
 
 ```bash
 gmp submit ebench/mobile_manip/test
@@ -94,20 +77,28 @@ gmp submit ebench/table_top_manip/val_unseen
 gmp submit ebench/generalist/val_train
 ```
 
-## End-to-end flow
+## Quick start
 
-1. Prepare environment and install server/client dependencies
-2. Pull EBench data and map it to `saved/`
-3. Start `ray_eval_server.py`
-4. Submit one or more benchmark configs with `gmp submit`
-5. Run client workers (`gmp eval` or custom EvalClient loop)
-6. Track progress using `gmp status` and read outputs under `saved/eval_results/`
+1. Clone the repository and set up the Isaac Sim server environment.
+2. Install the `genmanip-client` package into your model environment.
+3. Download assets: `huggingface-cli download InternRobotics/EBench-Assets --local-dir saved --repo-type dataset`.
+4. Start the evaluation server with `ray_eval_server.py`.
+5. Submit a benchmark job with `gmp submit` and inspect results under `saved/eval_results/`.
+
+## Architecture
+
+EBench separates simulation from model inference:
+
+- **Server** — runs Isaac Sim and the benchmark logic. Heavy dependencies (Isaac Sim, cuRobo, etc.) live here.
+- **Client** — a minimal Python package (`genmanip-client`) with very few dependencies. Install it alongside your model, then `import` the communication client to interact with the server.
+
+This design keeps your model environment clean and avoids dependency conflicts between Isaac Sim and your training/inference stack.
 
 ## Continue reading
 
 <div class="overview-link-chips">
   <a class="overview-link-chip" href="/getting-started/environment/">Environment Setup</a>
-  <a class="overview-link-chip" href="/getting-started/assets/">Dataset and Assets</a>
+  <a class="overview-link-chip" href="/getting-started/assets/">Asset & Dataset</a>
   <a class="overview-link-chip" href="/evaluation/run-benchmark/">Run Evaluation</a>
   <a class="overview-link-chip" href="/evaluation/custom-model/">Integrate Your Own Model</a>
   <a class="overview-link-chip" href="/tools/gmp-cli/">GMP CLI</a>

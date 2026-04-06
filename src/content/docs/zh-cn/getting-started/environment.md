@@ -1,85 +1,71 @@
 ---
 title: 环境配置
-description: 准备 EBench 评测所需的 GenManip server/client 环境。
+description: 部署 Isaac Sim server 环境，并在模型环境中安装轻量 client 包。
 ---
 
-## 组件关系
+EBench 采用 client–server 架构，你需要配置**两套环境**：
 
-- `GenManip-Sim` 提供评测服务端入口 `ray_eval_server.py` 和 benchmark task 配置。
-- `genmanip-client` 提供 `gmp` CLI 和 `EvalClient` API。
-- `EBench` 提供需要挂载到 `GenManip-Sim/saved/` 下的 benchmark 数据与资产。
+- **Server 环境** — Isaac Sim、cuRobo 和评测代码。
+- **Client 环境** — 仅需 `genmanip-client` 和模型自身的依赖。该包依赖极少，避免冲突。
 
 ## 前置条件
 
-- Linux 工作站或集群节点 + NVIDIA GPU。
-- CUDA 12.1 兼容环境。
-- Isaac Sim 运行时（`/isaac-sim/python.sh` 或 pip 安装的 Isaac Sim 包）。
-- Git 和（用于拉数据）DVC。
+- Linux 工作站 + NVIDIA GPU。
+- CUDA 12.1 及兼容驱动。
+- Isaac Sim 4.1.0 兼容的 Python 环境（server 侧）。
+- `git-lfs`。
 
-## 1. 克隆 benchmark 与 infra 仓库
+## 克隆仓库
 
 ```bash
-git clone --recursive -b feature/pioneer https://gitee.pjlab.org.cn/L2/MultimodalVLA/GenManip-Sim.git
-git clone https://gitee.pjlab.org.cn/L2/SimPlatform/EBench.git
+git clone https://github.com/InternRobotics/GenManip.git
+cd GenManip
 ```
 
-## 2. 安装 server 侧依赖
+## Server 环境
 
-在将要运行 `ray_eval_server.py` 的环境里安装依赖：
+### 安装 Isaac Sim
+
+当前配置使用 Isaac Sim `4.1.0`、CUDA `12.1`、Torch `2.4.0`：
 
 ```bash
-/isaac-sim/python.sh -m pip install -r GenManip-Sim/requirements.txt
+export CUDA_HOME=/usr/local/cuda-12.1
+pip install isaacsim==4.1.0 isaacsim-extscache-kit==4.1.0 isaacsim-extscache-kit-sdk==4.1.0 isaacsim-extscache-physics==4.1.0 --extra-index-url https://pypi.nvidia.com
+pip install torch==2.4.0 --extra-index-url https://download.pytorch.org/whl/cu121
+sudo apt install git-lfs
 ```
 
-如果你使用的是纯 Python 环境 + Isaac Sim wheels，可改为 `python -m pip`。
+如果已有本机 Isaac Sim 安装，可直接使用——server 侧命令改用 `/isaac-sim/python.sh` 即可。
 
-## 3. 在模型环境安装 client 包
+### 安装项目依赖
 
-从 `GenManip-Sim` 的源码目录安装 `gmp`：
+EBench 依赖 `cuRobo` 和仓库 requirements：
 
 ```bash
-pip install -e GenManip-Sim/standalone_tools/packages/genmanip_client/
+mkdir -p saved/envs
+git clone https://github.com/NVlabs/curobo.git saved/envs/curobo
+pip install -e saved/envs/curobo --no-build-isolation
+pip install -r requirements.txt
+```
+
+## Client 环境
+
+Client 包极轻量，可以和模型依赖共存而不产生冲突。
+
+```bash
+pip install -e standalone_tools/packages/genmanip_client/
 gmp --help
 ```
 
-推荐拆分：
+安装完成后，可以在模型代码中直接 `import` 通信 client 与 Server 交互。
 
-- Server 环境：Isaac Sim + GenManip-Sim 运行依赖。
-- Client 环境：`genmanip-client` + 模型推理依赖。
+## 快速验证
 
-## 4. 拉取 EBench 数据
+在下载资产或启动评测之前，先确认：
 
-```bash
-cd EBench
-pip install "dvc[oss,s3]"
-dvc pull
-cd ..
-ln -s EBench GenManip-Sim/saved
-```
-
-完成后，`GenManip-Sim/saved/` 应该能直接看到 benchmark 资产，并作为默认评测输出目录，例如 `saved/eval_results/`。
-
-## 5. 验证环境
-
-终端 1（server）：
-
-```bash
-cd GenManip-Sim
-/isaac-sim/python.sh ray_eval_server.py -n 50
-```
-
-终端 2（client）：
-
-```bash
-cd /path/to/your/client-env
-gmp submit ebench/mobile_manip/test
-```
-
-提交成功后，启动一个 worker：
-
-```bash
-gmp eval -a r5a -g lift2 --worker_ids 0
-```
+- 仓库根目录下 `saved/` 存在。
+- client 环境中 `gmp --help` 正常。
+- server 环境中 `python ray_eval_server.py --help` 或 `/isaac-sim/python.sh ray_eval_server.py --help` 正常。
 
 ## 网络提醒
 

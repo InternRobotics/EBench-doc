@@ -553,6 +553,64 @@ main {
 	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
 }
 
+/* ─── Task showcase ─── */
+
+.showcase-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.85rem;
+	margin-top: 1rem;
+}
+
+.showcase-card {
+	position: relative;
+	margin: 0;
+	border: 1px solid var(--ebench-line-subtle);
+	border-radius: 1rem;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.65);
+	backdrop-filter: blur(8px);
+	transition: border-color 250ms ease, box-shadow 250ms ease, transform 250ms var(--ebench-ease);
+}
+
+.showcase-card:hover {
+	border-color: color-mix(in srgb, var(--sl-color-accent) 18%, var(--ebench-line-soft));
+	box-shadow: 0 6px 24px color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
+	transform: translateY(-2px);
+}
+
+.showcase-card video {
+	display: block;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	object-fit: cover;
+	border-radius: 0;
+}
+
+.showcase-label {
+	display: block;
+	padding: 0.55rem 0.75rem;
+	font-size: 0.84rem;
+	font-weight: 650;
+	color: var(--sl-color-gray-1);
+	text-align: center;
+}
+
+:root:not([data-theme='light']) .showcase-card {
+	background: rgba(18, 20, 28, 0.7);
+	backdrop-filter: blur(10px);
+}
+
+:root:not([data-theme='light']) .showcase-card:hover {
+	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 50rem) {
+	.showcase-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
 /* ─── Landing page: link chips ─── */
 
 .overview-link-chips {

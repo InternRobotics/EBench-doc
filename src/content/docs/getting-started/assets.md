@@ -1,53 +1,45 @@
 ---
-title: Dataset and Assets
-description: Place EBench benchmark data under GenManip-Sim/saved/ so evaluation can resolve configs, assets, and outputs.
+title: Asset & Dataset
+description: Download EBench benchmark assets and the training dataset.
 ---
 
-## Expected directory layout
+## Benchmark assets
 
-For the GenManip workflow, benchmark data must be visible under `saved/` in the `GenManip-Sim` project root.
+EBench benchmark assets are hosted on Hugging Face at [InternRobotics/EBench-Assets](https://huggingface.co/datasets/InternRobotics/EBench-Assets). Download them directly into the `saved/` directory in the repository root:
 
-Typical directories include:
+```bash
+huggingface-cli download InternRobotics/EBench-Assets --local-dir saved --repo-type dataset
+```
 
-- `saved/assets/`: scene USDs, robots, textures, and packaged assets.
-- `saved/tasks/`: task packages copied from downloaded bundles when package-based delivery is used.
-- `saved/eval_results/`: local evaluation outputs.
-
-In a common local setup, `GenManip-Sim/saved` is a symlink to the checked-out `EBench/` repository.
-
-## Recommended source of truth
-
-Use the benchmark release that matches the task configs you plan to submit. In `GenManip-Sim`, the EBench task readme currently documents a versioned benchmark checkout and pinned dataset commit.
-
-If your team distributes assets through a package or archive instead of a direct repo checkout, keep the extracted layout compatible with `saved/`.
-
-## Manual extraction
-
-If the benchmark assets are distributed as a zip or tarball, extract them so the final structure still starts with `saved/`.
-
-For example:
+After downloading, the directory layout should look like:
 
 ```text
-EBench/
+GenManip/
 ├── saved/
 │   ├── assets/
 │   ├── tasks/
-│   └── eval_results/
+│   └── eval_results/   ← created during evaluation
 └── ...
 ```
 
-## What the downloader does
+## Training dataset
 
-`GenManip-Sim/standalone_tools/download_assets.py` can populate package-style assets into the project layout.
+The training dataset is available at [InternRobotics/EBench-Dataset](https://huggingface.co/datasets/InternRobotics/EBench-Dataset) in **LeRobot format**:
 
-When a custom dataset ID is used:
+```bash
+huggingface-cli download InternRobotics/EBench-Dataset --local-dir saved/dataset --repo-type dataset
+```
 
-- assets are unpacked into `saved/assets/collected_packages/<repo_name>/`
-- task configs are copied into `saved/tasks/`
-- cameras are copied into `configs/` when they are present in the package
+The LeRobot format is directly compatible with common VLA training pipelines.
+
+## Directory layout
+
+- `saved/assets/`: scene USDs, robots, textures, and packaged assets.
+- `saved/tasks/`: task packages from downloaded bundles.
+- `saved/eval_results/`: local evaluation outputs (created when you run evaluations).
+- `saved/dataset/`: training dataset in LeRobot format (if downloaded).
 
 ## Notes
 
 - Keep asset versions aligned with the benchmark release you are evaluating.
-- If you switch to a new package version, clean or archive old assets first to avoid mixing files from different releases.
-- This page intentionally avoids publishing placeholder distribution IDs. Add the exact download command here only when the public package path is finalized.
+- If you switch to a new asset version, clean or archive old files first to avoid mixing releases.
