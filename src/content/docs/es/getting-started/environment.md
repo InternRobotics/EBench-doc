@@ -5,8 +5,8 @@ description: Configura el entorno del servidor Isaac Sim y el paquete cliente li
 
 EBench emplea una arquitectura cliente-servidor. Necesitarás configurar **dos entornos**:
 
-- **Entorno del servidor** — Isaac Sim, cuRobo y el código del benchmark.
-- **Entorno del cliente** — solo `genmanip-client` junto con las dependencias de tu modelo. Este paquete tiene muy pocas dependencias para evitar conflictos.
+- **Entorno del servidor** — Isaac Sim, cuRobo y el código del servidor de simulación del repositorio [GenManip](https://github.com/InternRobotics/GenManip).
+- **Entorno del cliente** — **el propio entorno Python de tu modelo**. El paquete ligero [`genmanip-client`](https://github.com/InternRobotics/genmanip-client) se instala junto a las dependencias de tu modelo y tiene muy pocas dependencias propias, así que no entrará en conflicto con tu modelo.
 
 ## Requisitos previos
 
@@ -14,14 +14,14 @@ EBench emplea una arquitectura cliente-servidor. Necesitarás configurar **dos e
 - CUDA 12.1 y un driver compatible.
 - Un entorno Python compatible con Isaac Sim 4.1.0 (para el servidor).
 
-## Clonar el repositorio
+## Entorno del servidor
+
+### Clonar el servidor de simulación
 
 ```bash
 git clone https://github.com/InternRobotics/GenManip.git
 cd GenManip
 ```
-
-## Entorno del servidor
 
 ### Instalar Isaac Sim
 
@@ -44,8 +44,12 @@ pip install -r requirements.txt
 
 ## Entorno del cliente
 
+El cliente vive en **el entorno Python en el que se ejecuta tu modelo** — instálalo allí, junto a las dependencias de tu modelo. `genmanip-client` ya es un repositorio independiente con muy pocas dependencias, así que no entrará en conflicto con nada de tu entorno de modelo.
+
 ```bash
-pip install -e standalone_tools/packages/genmanip_client/
+git clone https://github.com/InternRobotics/genmanip-client.git
+cd genmanip-client
+pip install -e .
 gmp --help
 ```
 
@@ -61,4 +65,4 @@ python ray_eval_server.py --help
 gmp --help
 ```
 
-Siguiente paso: [descargar los assets del benchmark](/es/getting-started/assets/).
+Siguiente paso: [descargar los assets del benchmark](/EBench-doc/es/getting-started/assets/).

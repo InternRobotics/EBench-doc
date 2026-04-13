@@ -43,7 +43,7 @@ Schneller Konnektivitaetstest mit der integrierten Baseline:
 gmp eval -a r5a -g lift2 --worker_ids 0
 ```
 
-Fuer Ihr eigenes Modell siehe [Eigenes Modell einbinden](/de/evaluation/custom-model/).
+Fuer Ihr eigenes Modell siehe [Eigenes Modell einbinden](/EBench-doc/de/evaluation/custom-model/).
 
 ## 4. Ergebnisse pruefen
 
@@ -53,4 +53,4 @@ gmp status
 
 Ergebnisse werden unter `saved/eval_results/<task>/<run_id>/` gespeichert.
 
-> Wenn Server und Client auf verschiedenen Maschinen laufen, uebergeben Sie `--host <ip> --port <port>` an alle `gmp`-Befehle. Siehe die [GMP-CLI-Referenz](/de/tools/gmp-cli/) fuer alle Optionen.
+> Wenn Server und Client auf verschiedenen Maschinen laufen, uebergeben Sie `--host <ip> --port <port>` an alle `gmp`-Befehle. Siehe die [GMP-CLI-Referenz](/EBench-doc/de/tools/gmp-cli/) fuer alle Optionen.

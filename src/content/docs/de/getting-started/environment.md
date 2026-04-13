@@ -5,8 +5,8 @@ description: Isaac-Sim-Server-Umgebung und das leichtgewichtige Client-Paket fue
 
 EBench verwendet eine Client-Server-Architektur. Sie muessen **zwei Umgebungen** einrichten:
 
-- **Server-Umgebung** -- Isaac Sim, cuRobo und der Benchmark-Code.
-- **Client-Umgebung** -- nur `genmanip-client` zusammen mit Ihren Modellabhaengigkeiten. Dieses Paket hat sehr wenige Abhaengigkeiten, um Konflikte zu vermeiden.
+- **Server-Umgebung** -- Isaac Sim, cuRobo und der Simulations-Server-Code aus dem [GenManip](https://github.com/InternRobotics/GenManip)-Repository.
+- **Client-Umgebung** -- **die Python-Umgebung Ihres eigenen Modells**. Das leichtgewichtige Paket [`genmanip-client`](https://github.com/InternRobotics/genmanip-client) wird zusammen mit Ihren Modellabhaengigkeiten installiert. Es hat selbst sehr wenige Abhaengigkeiten und kollidiert daher nicht mit Ihrer Modellumgebung.
 
 ## Voraussetzungen
 
@@ -14,14 +14,14 @@ EBench verwendet eine Client-Server-Architektur. Sie muessen **zwei Umgebungen**
 - CUDA 12.1 und ein kompatibler Treiber.
 - Eine mit Isaac Sim 4.1.0 kompatible Python-Umgebung (fuer den Server).
 
-## Repository klonen
+## Server-Umgebung
+
+### Simulations-Server klonen
 
 ```bash
 git clone https://github.com/InternRobotics/GenManip.git
 cd GenManip
 ```
-
-## Server-Umgebung
 
 ### Isaac Sim installieren
 
@@ -44,8 +44,12 @@ pip install -r requirements.txt
 
 ## Client-Umgebung
 
+Der Client lebt in **der Python-Umgebung, in der Ihr Modell laeuft** -- installieren Sie ihn dort, zusammen mit Ihren Modellabhaengigkeiten. `genmanip-client` ist inzwischen ein eigenstaendiges Repository mit sehr wenigen Abhaengigkeiten und kollidiert mit nichts in Ihrer Modellumgebung.
+
 ```bash
-pip install -e standalone_tools/packages/genmanip_client/
+git clone https://github.com/InternRobotics/genmanip-client.git
+cd genmanip-client
+pip install -e .
 gmp --help
 ```
 
@@ -61,4 +65,4 @@ python ray_eval_server.py --help
 gmp --help
 ```
 
-Naechster Schritt: [Benchmark-Assets herunterladen](/de/getting-started/assets/).
+Naechster Schritt: [Benchmark-Assets herunterladen](/EBench-doc/de/getting-started/assets/).

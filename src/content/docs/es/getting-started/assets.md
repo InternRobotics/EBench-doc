@@ -30,4 +30,4 @@ huggingface-cli download InternRobotics/EBench-Dataset --local-dir saved/dataset
 
 El dataset utiliza el formato [LeRobot](https://github.com/huggingface/lerobot), directamente compatible con los pipelines de entrenamiento VLA más habituales.
 
-Siguiente paso: [ejecutar tu primera evaluación](/es/evaluation/run-benchmark/).
+Siguiente paso: [ejecutar tu primera evaluación](/EBench-doc/es/evaluation/run-benchmark/).

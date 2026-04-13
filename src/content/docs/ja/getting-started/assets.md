@@ -30,4 +30,4 @@ huggingface-cli download InternRobotics/EBench-Dataset --local-dir saved/dataset
 
 データセットは [LeRobot](https://github.com/huggingface/lerobot) 形式で、一般的な VLA トレーニングパイプラインとそのまま互換性があります。
 
-次のステップ：[最初の評価を実行する](/ja/evaluation/run-benchmark/)。
+次のステップ：[最初の評価を実行する](/EBench-doc/ja/evaluation/run-benchmark/)。

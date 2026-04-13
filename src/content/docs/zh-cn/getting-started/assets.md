@@ -30,4 +30,4 @@ huggingface-cli download InternRobotics/EBench-Dataset --local-dir saved/dataset
 
 数据集采用 [LeRobot](https://github.com/huggingface/lerobot) 格式，可直接用于常见的 VLA 训练流水线。
 
-下一步：[运行第一次评测](/zh-cn/evaluation/run-benchmark/)。
+下一步：[运行第一次评测](/EBench-doc/zh-cn/evaluation/run-benchmark/)。

@@ -30,4 +30,4 @@ huggingface-cli download InternRobotics/EBench-Dataset --local-dir saved/dataset
 
 Le jeu de données utilise le format [LeRobot](https://github.com/huggingface/lerobot), directement compatible avec les pipelines d'entraînement VLA courants.
 
-Étape suivante : [lancer votre première évaluation](/fr/evaluation/run-benchmark/).
+Étape suivante : [lancer votre première évaluation](/EBench-doc/fr/evaluation/run-benchmark/).

@@ -43,7 +43,7 @@ Split：`val_train`、`val_unseen`、`test`
 gmp eval -a r5a -g lift2 --worker_ids 0
 ```
 
-接入自己的模型见[接入自定义模型](/zh-cn/evaluation/custom-model/)。
+接入自己的模型见[接入自定义模型](/EBench-doc/zh-cn/evaluation/custom-model/)。
 
 ## 4. 查看结果
 
@@ -53,4 +53,4 @@ gmp status
 
 结果保存在 `saved/eval_results/<task>/<run_id>/` 下。
 
-> 当 server 和 client 在不同机器上时，所有 `gmp` 命令需要加 `--host <ip> --port <port>`。完整选项见 [GMP CLI 参考](/zh-cn/tools/gmp-cli/)。
+> 当 server 和 client 在不同机器上时，所有 `gmp` 命令需要加 `--host <ip> --port <port>`。完整选项见 [GMP CLI 参考](/EBench-doc/zh-cn/tools/gmp-cli/)。

@@ -43,7 +43,7 @@ Quick connectivity check with the built-in baseline:
 gmp eval -a r5a -g lift2 --worker_ids 0
 ```
 
-For your own model, see [Integrate Your Own Model](/evaluation/custom-model/).
+For your own model, see [Integrate Your Own Model](/EBench-doc/evaluation/custom-model/).
 
 ## 4. Check results
 
@@ -53,4 +53,4 @@ gmp status
 
 Results are saved to `saved/eval_results/<task>/<run_id>/`.
 
-> When running server and client on different machines, pass `--host <ip> --port <port>` to all `gmp` commands. See the [GMP CLI reference](/tools/gmp-cli/) for all options.
+> When running server and client on different machines, pass `--host <ip> --port <port>` to all `gmp` commands. See the [GMP CLI reference](/EBench-doc/tools/gmp-cli/) for all options.

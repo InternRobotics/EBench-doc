@@ -43,7 +43,7 @@ gmp submit ebench/mobile_manip/test --run_id my_first_run
 gmp eval -a r5a -g lift2 --worker_ids 0
 ```
 
-独自のモデルを使用する場合は、[モデルの統合](/ja/evaluation/custom-model/) を参照してください。
+独自のモデルを使用する場合は、[モデルの統合](/EBench-doc/ja/evaluation/custom-model/) を参照してください。
 
 ## 4. 結果の確認
 
@@ -53,4 +53,4 @@ gmp status
 
 結果は `saved/eval_results/<task>/<run_id>/` に保存されます。
 
-> サーバーとクライアントを別々のマシンで実行する場合は、すべての `gmp` コマンドに `--host <ip> --port <port>` を指定してください。すべてのオプションについては [GMP CLI リファレンス](/ja/tools/gmp-cli/) を参照してください。
+> サーバーとクライアントを別々のマシンで実行する場合は、すべての `gmp` コマンドに `--host <ip> --port <port>` を指定してください。すべてのオプションについては [GMP CLI リファレンス](/EBench-doc/ja/tools/gmp-cli/) を参照してください。

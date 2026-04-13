@@ -43,7 +43,7 @@ Split: `val_train`, `val_unseen`, `test`
 gmp eval -a r5a -g lift2 --worker_ids 0
 ```
 
-직접 만든 모델을 연동하려면 [모델 연동](/ko/evaluation/custom-model/)을 참고하세요.
+직접 만든 모델을 연동하려면 [모델 연동](/EBench-doc/ko/evaluation/custom-model/)을 참고하세요.
 
 ## 4. 결과 확인
 
@@ -53,4 +53,4 @@ gmp status
 
 결과는 `saved/eval_results/<task>/<run_id>/`에 저장됩니다.
 
-> 서버와 클라이언트가 서로 다른 머신에 있을 경우, 모든 `gmp` 명령에 `--host <ip> --port <port>`를 추가하세요. 전체 옵션은 [GMP CLI 레퍼런스](/ko/tools/gmp-cli/)를 참고하세요.
+> 서버와 클라이언트가 서로 다른 머신에 있을 경우, 모든 `gmp` 명령에 `--host <ip> --port <port>`를 추가하세요. 전체 옵션은 [GMP CLI 레퍼런스](/EBench-doc/ko/tools/gmp-cli/)를 참고하세요.

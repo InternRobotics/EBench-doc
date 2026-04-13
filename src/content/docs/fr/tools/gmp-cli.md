@@ -70,7 +70,7 @@ gmp eval -a r5a -g lift2 --worker_ids 0 --frame_save_interval 10
 gmp eval --worker_ids 0,1 --chunk_size 8 --host 127.0.0.1 --port 8087
 ```
 
-Pour intégrer un modèle personnalisé, consultez [Intégrer votre modèle](/fr/evaluation/custom-model/).
+Pour intégrer un modèle personnalisé, consultez [Intégrer votre modèle](/EBench-doc/fr/evaluation/custom-model/).
 
 ## Clean, plot et visualize
 

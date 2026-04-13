@@ -43,7 +43,7 @@ Vérification rapide de la connectivité avec le modèle de référence intégr�
 gmp eval -a r5a -g lift2 --worker_ids 0
 ```
 
-Pour intégrer votre propre modèle, consultez [Intégrer votre modèle](/fr/evaluation/custom-model/).
+Pour intégrer votre propre modèle, consultez [Intégrer votre modèle](/EBench-doc/fr/evaluation/custom-model/).
 
 ## 4. Consulter les résultats
 
@@ -53,4 +53,4 @@ gmp status
 
 Les résultats sont enregistrés dans `saved/eval_results/<task>/<run_id>/`.
 
-> Lorsque le serveur et le client s'exécutent sur des machines différentes, ajoutez `--host <ip> --port <port>` à toutes les commandes `gmp`. Consultez la [référence GMP CLI](/fr/tools/gmp-cli/) pour la liste complète des options.
+> Lorsque le serveur et le client s'exécutent sur des machines différentes, ajoutez `--host <ip> --port <port>` à toutes les commandes `gmp`. Consultez la [référence GMP CLI](/EBench-doc/fr/tools/gmp-cli/) pour la liste complète des options.

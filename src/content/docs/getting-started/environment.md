@@ -5,8 +5,8 @@ description: Set up the Isaac Sim server environment and the lightweight client 
 
 EBench uses a client–server architecture. You will set up **two environments**:
 
-- **Server environment** — Isaac Sim, cuRobo, and the benchmark code.
-- **Client environment** — just `genmanip-client` alongside your model dependencies. This package has very few dependencies to avoid conflicts.
+- **Server environment** — Isaac Sim, cuRobo, and the simulation server code from the [GenManip](https://github.com/InternRobotics/GenManip) repository.
+- **Client environment** — **your model's own Python environment**. The lightweight [`genmanip-client`](https://github.com/InternRobotics/genmanip-client) package is installed alongside your model dependencies and has very few dependencies of its own, so it will not conflict with your model.
 
 ## Prerequisites
 
@@ -14,14 +14,14 @@ EBench uses a client–server architecture. You will set up **two environments**
 - CUDA 12.1 and a compatible driver.
 - An Isaac Sim 4.1.0 compatible Python environment (for the server).
 
-## Clone the repository
+## Server environment
+
+### Clone the simulation server
 
 ```bash
 git clone https://github.com/InternRobotics/GenManip.git
 cd GenManip
 ```
-
-## Server environment
 
 ### Install Isaac Sim
 
@@ -44,8 +44,12 @@ pip install -r requirements.txt
 
 ## Client environment
 
+The client lives in **the Python environment where your model runs** — install it there, alongside your model dependencies. `genmanip-client` is a standalone repository with minimal dependencies, so it will not conflict with anything in your model environment.
+
 ```bash
-pip install -e standalone_tools/packages/genmanip_client/
+git clone https://github.com/InternRobotics/genmanip-client.git
+cd genmanip-client
+pip install -e .
 gmp --help
 ```
 
@@ -61,4 +65,4 @@ python ray_eval_server.py --help
 gmp --help
 ```
 
-Next step: [download benchmark assets](/getting-started/assets/).
+Next step: [download benchmark assets](/EBench-doc/getting-started/assets/).

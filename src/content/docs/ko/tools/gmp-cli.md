@@ -70,7 +70,7 @@ gmp eval -a r5a -g lift2 --worker_ids 0 --frame_save_interval 10
 gmp eval --worker_ids 0,1 --chunk_size 8 --host 127.0.0.1 --port 8087
 ```
 
-커스텀 모델 연동은 [모델 연동](/ko/evaluation/custom-model/)을 참고하세요.
+커스텀 모델 연동은 [모델 연동](/EBench-doc/ko/evaluation/custom-model/)을 참고하세요.
 
 ## 정리, 플롯 및 시각화
 

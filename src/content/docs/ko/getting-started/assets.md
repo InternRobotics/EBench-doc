@@ -30,4 +30,4 @@ huggingface-cli download InternRobotics/EBench-Dataset --local-dir saved/dataset
 
 데이터셋은 [LeRobot](https://github.com/huggingface/lerobot) 형식을 사용하며, 일반적인 VLA 학습 파이프라인과 바로 호환됩니다.
 
-다음 단계: [첫 번째 평가 실행](/ko/evaluation/run-benchmark/).
+다음 단계: [첫 번째 평가 실행](/EBench-doc/ko/evaluation/run-benchmark/).
