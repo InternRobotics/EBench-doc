@@ -5,6 +5,15 @@ const currentLocale = Astro.locals.starlightRoute.locale;
 const localeEntries = Object.entries(config.locales ?? {});
 const nonRootLocales = localeEntries.map(([code]) => code).filter((code) => code !== 'root');
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const stripBase = (pathname: string) => {
+	if (!base) return pathname;
+	if (pathname === base) return '/';
+	if (pathname.startsWith(`${base}/`)) return pathname.slice(base.length);
+	return pathname;
+};
+
 const stripLocalePrefix = (pathname: string) => {
 	for (const code of nonRootLocales) {
 		if (pathname === `/${code}` || pathname === `/${code}/`) return '/';
@@ -18,12 +27,15 @@ const ensureTrailingSlash = (pathname: string) => {
 	return pathname.endsWith('/') ? pathname : `${pathname}/`;
 };
 
-const basePathname = ensureTrailingSlash(stripLocalePrefix(Astro.url.pathname));
+const basePathname = ensureTrailingSlash(stripLocalePrefix(stripBase(Astro.url.pathname)));
 
 const locales = localeEntries.map(([code, locale]) => ({
 	code,
 	label: locale!.label,
-	href: code === 'root' ? basePathname : `/${code}${basePathname === '/' ? '/' : basePathname}`,
+	href:
+		code === 'root'
+			? `${base}${basePathname}`
+			: `${base}/${code}${basePathname === '/' ? '/' : basePathname}`,
 	current: code === currentLocale,
 }));
 
