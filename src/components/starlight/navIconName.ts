@@ -15,6 +15,7 @@ export const getNavIconName = (label = '', href = '') => {
 	if (text.includes('download') || text.includes('资产')) return 'download';
 	if (text.includes('evaluation') || text.includes('评测') || text.includes('测试')) return 'grid';
 	if (text.includes('run') || text.includes('运行')) return 'nodes';
+	if (text.includes('challenge') || text.includes('leaderboard') || text.includes('榜单') || text.includes('挑战赛')) return 'leaderboard';
 	if (text.includes('gmp') || text.includes('cli') || text.includes('code')) return 'code';
 	if (text.includes('install') || text.includes('安装')) return 'file';
 	if (text.includes('feature') || text.includes('功能')) return 'grid';

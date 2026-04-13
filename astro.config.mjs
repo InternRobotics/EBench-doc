@@ -135,6 +135,11 @@ export default defineConfig({
 						},
 					],
 				},
+				{
+					slug: 'challenge',
+					label: 'Challenge',
+					translations: { 'zh-CN': '挑战赛', fr: 'Challenge', ja: 'Challenge', ko: 'Challenge', de: 'Challenge', es: 'Challenge' },
+				},
 			],
 		}),
 	],

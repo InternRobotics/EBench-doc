@@ -1,0 +1,115 @@
+---
+import { getLocalizedText, showcaseCategories, showcaseCopy, type ShowcaseLocale } from '../data/taskShowcase';
+
+interface Props {
+	locale?: ShowcaseLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const copy = showcaseCopy[locale] ?? showcaseCopy.en;
+---
+
+<div class="task-showcase not-content">
+	<p class="task-showcase-intro">{copy.intro}</p>
+
+	{
+		showcaseCategories.map((category) => {
+			const sectionId = `showcase-${category.id}`;
+			return (
+				<section class="task-showcase-section" data-showcase-section>
+					<h2 id={sectionId}>{getLocalizedText(category.title, locale)}</h2>
+					<div class="showcase-grid not-content">
+						{
+							category.tasks.map((task) => (
+								<div class="showcase-card">
+									<video src={task.video} autoplay loop muted playsinline></video>
+									<span class="showcase-label">{getLocalizedText(task.label, locale)}</span>
+								</div>
+							))
+						}
+					</div>
+					<div class="task-tabs" data-task-tabs>
+						<div class="task-tab-list" role="tablist" aria-labelledby={sectionId}>
+							{
+								category.tasks.map((task, index) => (
+									<button
+										type="button"
+										class:list={['task-tab-button', { active: index === 0 }]}
+										role="tab"
+										aria-selected={index === 0 ? 'true' : 'false'}
+										data-task-tab
+										data-target={`${category.id}-${task.id}`}
+									>
+										{getLocalizedText(task.label, locale)}
+									</button>
+								))
+							}
+						</div>
+
+						<div class="task-panels">
+							{
+								category.tasks.map((task, index) => (
+									<article
+										class:list={['task-panel', { active: index === 0 }]}
+										role="tabpanel"
+										data-task-panel
+										data-panel-id={`${category.id}-${task.id}`}
+									>
+										<div class="task-panel-media">
+											<video src={task.video} autoplay loop muted playsinline controls></video>
+										</div>
+										<div class="task-panel-meta">
+											<h3>{getLocalizedText(task.label, locale)}</h3>
+											<dl class="task-meta-list">
+												<div>
+													<dt>{copy.location}</dt>
+													<dd>{getLocalizedText(task.location, locale)}</dd>
+												</div>
+												<div>
+													<dt>{copy.instruction}</dt>
+													<dd>{getLocalizedText(task.instruction, locale)}</dd>
+												</div>
+												<div>
+													<dt>{copy.score}</dt>
+													<dd>{getLocalizedText(task.score, locale)}</dd>
+												</div>
+											</dl>
+										</div>
+									</article>
+								))
+							}
+						</div>
+					</div>
+				</section>
+			);
+		})
+	}
+</div>
+
+<script>
+	const setupTaskTabs = () => {
+		document.querySelectorAll('[data-task-tabs]').forEach((root) => {
+			const tabs = Array.from(root.querySelectorAll('[data-task-tab]'));
+			const panels = Array.from(root.querySelectorAll('[data-task-panel]'));
+
+			tabs.forEach((tab) => {
+				tab.addEventListener('click', () => {
+					const target = tab.getAttribute('data-target');
+					tabs.forEach((item) => {
+						item.classList.toggle('active', item === tab);
+						item.setAttribute('aria-selected', item === tab ? 'true' : 'false');
+					});
+					panels.forEach((panel) => {
+						panel.classList.toggle('active', panel.getAttribute('data-panel-id') === target);
+					});
+				});
+			});
+		});
+	};
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', setupTaskTabs, { once: true });
+	} else {
+		setupTaskTabs();
+	}
+</script>

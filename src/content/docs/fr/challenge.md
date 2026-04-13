@@ -1,0 +1,127 @@
+---
+title: Challenge
+description: Soumettez vos resultats EBench au classement de la challenge en ligne.
+---
+
+La challenge EBench prend en charge la soumission en ligne des resultats de benchmark. Suivez les etapes ci-dessous pour preparer une execution valide et la soumettre au service de classement.
+
+## Baseline et prise en main
+
+Avant de soumettre en ligne, assurez-vous de pouvoir executer le benchmark en local :
+
+- Configurez les environnements serveur et client dans [Mise en route](/fr/getting-started/environment/).
+- Preparez les assets requis du benchmark dans [Assets et données](/fr/getting-started/assets/).
+- Lancez d'abord un benchmark local avec [Lancer l'évaluation](/fr/evaluation/run-benchmark/).
+- Si vous utilisez votre propre policy, suivez [Intégrer votre modèle](/fr/evaluation/custom-model/).
+
+Vous devez verifier que votre execution locale se termine correctement et produit un dossier de resultats complet avant de tenter une soumission en ligne.
+
+## Etapes de soumission en ligne
+
+Le flux en ligne comporte trois etapes : creer une tache en ligne, attendre l'endpoint d'evaluation, puis executer les workers d'evaluation sur cet endpoint.
+
+### 1. Recuperer votre token
+
+Ouvrez la page d'accueil de la plateforme :
+
+```text
+https://internrobotics-staging.shlab.org.cn/eval/landing-page
+```
+
+Ensuite :
+
+1. Connectez-vous a la plateforme.
+2. Ouvrez la page de gestion des API keys ou des secrets.
+3. Creez une nouvelle API key et copiez la valeur du token.
+
+### 2. Preparer l'environnement client
+
+```bash
+git clone https://gitee.pjlab.org.cn/L2/MultimodalVLA/GenManip-Client.git
+cd GenManip-Client
+conda create -n client python=3.11 -y
+conda activate client
+pip install -e .
+```
+
+### 3. Creer une tache d'evaluation en ligne
+
+Utilisez `gmp online submit` pour demander une tache d'evaluation distante :
+
+```bash
+gmp online submit \
+  --base_url https://internrobotics-staging.shlab.org.cn/eval \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --benchmark_set EBench \
+  --model_name internVLA \
+  --model_type VLA
+```
+
+Une fois la tache backend prete, la commande renvoie des champs comme ceux-ci :
+
+```json
+{
+  "task_id": "9ea5fb6ae980430da626958c4433ea18",
+  "endpoint": "https://internrobotics-staging.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+}
+```
+
+Conservez ces deux valeurs :
+
+- `task_id` : utilisez-le comme `run_id` lors de l'execution de l'evaluation.
+- `endpoint` : utilisez-le comme URL d'evaluation distante.
+
+### 4. Demarrer les workers d'evaluation
+
+Executez l'evaluateur sur l'endpoint renvoye.
+
+```bash
+gmp eval \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID" \
+  -a r5a \
+  -g lift2 \
+  -chunk_size 40 \
+  --worker_id 0
+```
+
+Si vous souhaitez utiliser le deuxieme worker backend, ouvrez un autre terminal et lancez :
+
+```bash
+gmp eval \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID" \
+  -a r5a \
+  -g lift2 \
+  -chunk_size 40 \
+  --worker_id 1
+```
+
+### 5. Suivre la tache
+
+Une fois la tache en ligne creee, la page de la plateforme affichera la tache correspondante. Les sorties finales de l'evaluation sont ecrites dans le meme enregistrement de tache distante.
+
+
+## URL de soumission en ligne
+
+Creez les taches via l'URL de base officielle de la plateforme :
+
+```text
+https://internrobotics-staging.shlab.org.cn/eval
+```
+
+Apres `gmp online submit`, utilisez l'endpoint renvoye pour cette tache afin d'effectuer l'evaluation :
+
+```text
+https://internrobotics-staging.shlab.org.cn/evalserver/<task-endpoint>
+```
+
+## Checklist d'exemple
+
+- Baseline ou modele personnalise execute en local
+- Track et split corrects selectionnes
+- Token de soumission configure
+- URL de soumission en ligne confirmee
+- Fichiers de resultats prets pour l'envoi
