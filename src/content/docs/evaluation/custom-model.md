@@ -176,7 +176,7 @@ finally:
 
 ## Tips
 
-- **Use chunk mode for better performance**: Submit action lists via `client.step()` rather than single actions. The server executes them internally and returns only the final observation at the re-inference point.
+- **Use chunk mode for better performance**: Submit action lists via `client.step()` rather than single actions. The server executes them internally and returns only the final observation at the re-inference point. Only work for server with --no_save_process flag.
 - Load model weights in `__init__`, keep inference methods focused on prediction.
 - Use `reset=True` in `obs` to detect the first step and clear recurrent/buffer state.
 - Tune `chunk_size` to balance latency and throughput (e.g., `gmp eval --chunk_size 4`).

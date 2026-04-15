@@ -6,13 +6,13 @@ description: Start the Isaac Sim server and run an EBench evaluation.
 ## 1. Start the server
 
 ```bash
-python ray_eval_server.py --host 0.0.0.0 --port 8087
+python ray_eval_server.py --host 0.0.0.0 --port 8087 --no_save_process
 ```
 
 Or with a local Isaac Sim installation:
 
 ```bash
-/isaac-sim/python.sh ray_eval_server.py --host 0.0.0.0 --port 8087
+/isaac-sim/python.sh ray_eval_server.py --host 0.0.0.0 --port 8087 --no_save_process
 ```
 
 ## 2. Submit a task
