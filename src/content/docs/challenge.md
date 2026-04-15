@@ -25,13 +25,13 @@ The online workflow has three stages: create an online task, wait for the evalua
 Open the platform landing page:
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval/landing-page
+https://internrobotics.shlab.org.cn/eval/landing-page
 ```
 
 Then:
 
 1. Sign in to the platform.
-2. Open the API key or secret management page.
+2. Open the API key or secret management page from the top-right corner.
 3. Create a new API key and copy the token value.
 
 ### 2. Prepare the client environment
@@ -50,19 +50,34 @@ Use `gmp online submit` to request a remote evaluation job:
 
 ```bash
 gmp online submit \
-  --base_url https://internrobotics-staging.shlab.org.cn/eval \
+  --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
-  --benchmark_set EBench \
+  --benchmark_set ebench_generalist \
   --model_name internVLA \
-  --model_type VLA
+  --model_type VLA \
+  --submitter_name test \
+  --submitter_homepage test \
+  --is_public 0
 ```
+
+### Parameters
+
+| Parameter | Type | Example | Description |
+|-----------|------|---------|-------------|
+| task_id | string | T2025123100001 | Optional, can include previous task_id for task re-execution |
+| model_name | string | internVLA | Model name |
+| model_type | string | VLA | Model type |
+| benchmark_set | string | ebench_generalist | Benchmark set type, currently only ebench_generalist is allowed |
+| submitter_name | string | SHlab | Organization/developer name |
+| submitter_homepage | string | http://example.com | Submitter homepage |
+| is_public | int | 0 | Whether to make public<br>0 No<br>1 Yes |
 
 After the backend task is ready, the command returns fields like:
 
 ```json
 {
   "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics-staging.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
 }
 ```
 
@@ -73,7 +88,7 @@ Record both values:
 
 ### 4. Start evaluation workers
 
-Run the evaluator against the returned endpoint.
+Run the evaluator against the returned endpoint. This is a test evaluation. Follow the doc to reate your own model evaluation.
 
 ```bash
 gmp eval \
@@ -82,7 +97,7 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 0
 ```
 
@@ -95,9 +110,11 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 1
 ```
+
+The server supports up to 32 concurrent workers per run. Connections will be terminated after one hour of inactivity.
 
 ### 5. Monitor the task
 
@@ -109,13 +126,13 @@ After the online task is created, the platform page will show the corresponding 
 Create tasks through the official platform base URL:
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval
+https://internrobotics.shlab.org.cn/eval
 ```
 
 After `gmp online submit`, use the returned per-task endpoint for evaluation:
 
 ```text
-https://internrobotics-staging.shlab.org.cn/evalserver/<task-endpoint>
+https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
 ```
 
 ## Scoring Rules

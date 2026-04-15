@@ -50,12 +50,27 @@ Utilisez `gmp online submit` pour demander une tache d'evaluation distante :
 
 ```bash
 gmp online submit \
-  --base_url https://internrobotics-staging.shlab.org.cn/eval \
+  --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --benchmark_set EBench \
   --model_name internVLA \
-  --model_type VLA
+  --model_type VLA \
+  --submitter_name test \
+  --submitter_homepage test \
+  --is_public 0
 ```
+
+### Paramètres
+
+| Paramètre | Type | Exemple | Description |
+|-----------|------|---------|-------------|
+| task_id | string | T2025123100001 | Optionnel, peut inclure le task_id précédent pour ré-exécution de tâche |
+| model_name | string | internVLA | Nom du modèle |
+| model_type | string | VLA | Type de modèle |
+| benchmark_set | string | EBench | Type d'ensemble de benchmark, actuellement seulement EBench est autorisé |
+| submitter_name | string | SHlab | Nom d'organisation/développeur |
+| submitter_homepage | string | http://example.com | Page d'accueil du soumissionnaire |
+| is_public | int | 0 | Si public<br>0 Non<br>1 Oui |
 
 Une fois la tache backend prete, la commande renvoie des champs comme ceux-ci :
 
@@ -82,7 +97,7 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 0
 ```
 
@@ -95,9 +110,11 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 1
 ```
+
+Le serveur prend en charge jusqu'à 32 workers simultanés par exécution. Les connexions seront terminées après une heure d'inactivité.
 
 ### 5. Suivre la tache
 

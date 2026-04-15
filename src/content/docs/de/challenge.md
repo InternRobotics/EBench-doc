@@ -50,12 +50,27 @@ Verwenden Sie `gmp online submit`, um einen entfernten Bewertungsjob anzufordern
 
 ```bash
 gmp online submit \
-  --base_url https://internrobotics-staging.shlab.org.cn/eval \
+  --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --benchmark_set EBench \
   --model_name internVLA \
-  --model_type VLA
+  --model_type VLA \
+  --submitter_name test \
+  --submitter_homepage test \
+  --is_public 0
 ```
+
+### Parameter
+
+| Parameter | Typ | Beispiel | Beschreibung |
+|-----------|-----|----------|--------------|
+| task_id | string | T2025123100001 | Optional, vorherige task_id für Aufgabenwiederholung verwenden |
+| model_name | string | internVLA | Modellname |
+| model_type | string | VLA | Modelltyp |
+| benchmark_set | string | EBench | Benchmark-Set-Typ, derzeit nur EBench erlaubt |
+| submitter_name | string | SHlab | Organisations-/Entwicklername |
+| submitter_homepage | string | http://example.com | Homepage des Einreichers |
+| is_public | int | 0 | Ob öffentlich<br>0 Nein<br>1 Ja |
 
 Sobald die Backend-Aufgabe bereit ist, gibt der Befehl Felder wie diese zurueck:
 
@@ -82,7 +97,7 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 0
 ```
 
@@ -95,9 +110,11 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 1
 ```
+
+Der Server unterstuetzt bis zu 32 gleichzeitige Worker pro Lauf. Verbindungen werden nach einer Stunde Inaktivitaet beendet.
 
 ### 5. Aufgabe ueberwachen
 

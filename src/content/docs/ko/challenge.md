@@ -50,12 +50,27 @@ pip install -e .
 
 ```bash
 gmp online submit \
-  --base_url https://internrobotics-staging.shlab.org.cn/eval \
+  --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --benchmark_set EBench \
   --model_name internVLA \
-  --model_type VLA
+  --model_type VLA \
+  --submitter_name test \
+  --submitter_homepage test \
+  --is_public 0
 ```
+
+### 매개변수
+
+| 매개변수 | 타입 | 예시 | 설명 |
+|-----------|------|---------|-------------|
+| task_id | string | T2025123100001 | 선택사항, 작업 재실행 시 이전 task_id를 포함할 수 있습니다 |
+| model_name | string | internVLA | 모델 이름 |
+| model_type | string | VLA | 모델 타입 |
+| benchmark_set | string | EBench | 벤치마크 세트 타입, 현재 EBench만 허용됩니다 |
+| submitter_name | string | SHlab | 조직/개발자 이름 |
+| submitter_homepage | string | http://example.com | 제출자 홈페이지 |
+| is_public | int | 0 | 공개 여부<br>0 아니오<br>1 예 |
 
 백엔드 작업이 준비되면 명령은 다음과 같은 필드를 반환합니다.
 
@@ -82,7 +97,7 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 0
 ```
 
@@ -95,9 +110,11 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 1
 ```
+
+서버는 실행당 최대 32개의 동시 워커를 지원합니다. 연결은 1시간 비활성 상태 후에 종료됩니다.
 
 ### 5. 작업 상태 확인
 

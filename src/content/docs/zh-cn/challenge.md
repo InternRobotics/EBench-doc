@@ -50,12 +50,27 @@ pip install -e .
 
 ```bash
 gmp online submit \
-  --base_url https://internrobotics-staging.shlab.org.cn/eval \
+  --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
-  --benchmark_set EBench \
+  --benchmark_set ebench_generalist \
   --model_name internVLA \
-  --model_type VLA
+  --model_type VLA \
+  --submitter_name test \
+  --submitter_homepage test \
+  --is_public 0
 ```
+
+### 参数
+
+| 参数 | 类型 | 示例 | 说明 |
+|------|------|------|------|
+| task_id | string | T2025123100001 | 选填，任务重新执行可带入上一次task_id |
+| model_name | string | internVLA | 模型名称 |
+| model_type | string | VLA | 模型类型 |
+| benchmark_set | string | ebench_generalist | 评测集类型,目前只允许填 ebench_generalist |
+| submitter_name | string | SHlab | 机构/开发者名称 |
+| submitter_homepage | string | http://example.com | 提交者主页 |
+| is_public | int | 0 | 是否公开<br>0 否<br>1 是 |
 
 后端任务准备完成后，命令会返回如下字段：
 
@@ -82,7 +97,7 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 0
 ```
 
@@ -95,9 +110,11 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 1
 ```
+
+服务器每个运行最多支持32个并发worker。连接在闲置一小时后将被断开。
 
 ### 5. 监控任务状态
 

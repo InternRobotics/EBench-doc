@@ -50,12 +50,27 @@ pip install -e .
 
 ```bash
 gmp online submit \
-  --base_url https://internrobotics-staging.shlab.org.cn/eval \
+  --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --benchmark_set EBench \
   --model_name internVLA \
-  --model_type VLA
+  --model_type VLA \
+  --submitter_name test \
+  --submitter_homepage test \
+  --is_public 0
 ```
+
+### パラメータ
+
+| パラメータ | タイプ | 例 | 説明 |
+|-----------|------|---------|-------------|
+| task_id | string | T2025123100001 | オプション、前回のタスク再実行時に前のtask_idを含めることができます |
+| model_name | string | internVLA | モデル名 |
+| model_type | string | VLA | モデルタイプ |
+| benchmark_set | string | EBench | ベンチマークセットタイプ、現在EBenchのみ許可されています |
+| submitter_name | string | SHlab | 組織/開発者名 |
+| submitter_homepage | string | http://example.com | 提出者ホームページ |
+| is_public | int | 0 | 公開かどうか<br>0 いいえ<br>1 はい |
 
 バックエンドタスクの準備が完了すると、コマンドは次のようなフィールドを返します。
 
@@ -82,7 +97,7 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 0
 ```
 
@@ -95,9 +110,11 @@ gmp eval \
   --run_id "$EBENCH_TASK_ID" \
   -a r5a \
   -g lift2 \
-  -chunk_size 40 \
+  --chunk_size 40 \
   --worker_id 1
 ```
+
+サーバーは実行ごとに最大32の同時ワーカーをサポートします。接続は1時間の非アクティブ状態後に終了されます。
 
 ### 5. タスクを監視する
 
