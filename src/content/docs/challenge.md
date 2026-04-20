@@ -120,6 +120,14 @@ The server supports up to 32 concurrent workers per run. Connections will be ter
 
 After the online task is created, the platform page will show the corresponding task. The final evaluation outputs are written to the same remote task record.
 
+You can check the server status and task progress from terminal as well.
+
+```bash
+gmp status \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID" 
+```
 
 ## Online Submit URL
 
