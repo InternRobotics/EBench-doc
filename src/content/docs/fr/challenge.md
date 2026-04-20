@@ -88,37 +88,54 @@ Conservez ces deux valeurs :
 
 ### 4. Demarrer les workers d'evaluation
 
-Executez l'evaluateur sur l'endpoint renvoye.
+Executez l'evaluateur sur l'endpoint renvoye. Ceci est une evaluation de test. Suivez la documentation pour creer votre propre evaluation de modele.
 
-```bash
-gmp eval \
-  --url "$EBENCH_ONLINE_ENDPOINT" \
-  --token "$EBENCH_SUBMIT_TOKEN" \
-  --run_id "$EBENCH_TASK_ID" \
-  -a r5a \
-  -g lift2 \
-  --chunk_size 40 \
-  --worker_id 0
+```python
+client = EvalClient(
+    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
+    token="$EBENCH_SUBMIT_TOKEN"
+    run_id="9ea5fb6ae980430da626958c4433ea18",
+    worker_ids=["0"]
+)
+model = ModelClient(...)
+
+try:
+    obs = client.reset()
+    done = False
+    while not done:
+        # Generer des actions pour le chunk entier
+        action_chunk = model.get_action_chunk(obs)
+        # Le serveur execute le chunk en interne; retourne obs au prochain point de re-inference
+        obs, done = client.step(action_chunk)
+finally:
+    client.close()
 ```
 
-Si vous souhaitez utiliser le deuxieme worker backend, ouvrez un autre terminal et lancez :
+Vous pouvez demarrer plusieurs eval clients avec des IDs differents. Par exemple:
 
-```bash
-gmp eval \
-  --url "$EBENCH_ONLINE_ENDPOINT" \
-  --token "$EBENCH_SUBMIT_TOKEN" \
-  --run_id "$EBENCH_TASK_ID" \
-  -a r5a \
-  -g lift2 \
-  --chunk_size 40 \
-  --worker_id 1
+```python
+client = EvalClient(
+    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
+    token="$EBENCH_SUBMIT_TOKEN"
+    run_id="9ea5fb6ae980430da626958c4433ea18",
+    worker_ids=["1"]
+)
+...
 ```
 
-Le serveur prend en charge jusqu'à 32 workers simultanés par exécution. Les connexions seront terminées après une heure d'inactivité.
+Le serveur prend en charge jusqu'à 32 workers simultanes par execution. Les connexions seront terminees apres une heure d'inactivite.
 
 ### 5. Suivre la tache
 
 Une fois la tache en ligne creee, la page de la plateforme affichera la tache correspondante. Les sorties finales de l'evaluation sont ecrites dans le meme enregistrement de tache distante.
+
+Vous pouvez egalement verifier l'etat du serveur et la progression de la tache a partir du terminal.
+
+```bash
+gmp status \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID"
 
 
 ## URL de soumission en ligne

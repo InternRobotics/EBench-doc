@@ -88,30 +88,39 @@ gmp online submit \
 
 ### 4. 評価 worker を開始する
 
-返された endpoint に対して evaluator を実行します。
+返された endpoint に対して evaluator を実行します。これはテスト評価です。ドキュメントに従ってあなた自身のモデル評価を作成してください。
 
-```bash
-gmp eval \
-  --url "$EBENCH_ONLINE_ENDPOINT" \
-  --token "$EBENCH_SUBMIT_TOKEN" \
-  --run_id "$EBENCH_TASK_ID" \
-  -a r5a \
-  -g lift2 \
-  --chunk_size 40 \
-  --worker_id 0
+```python
+client = EvalClient(
+    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
+    token="$EBENCH_SUBMIT_TOKEN"
+    run_id="9ea5fb6ae980430da626958c4433ea18",
+    worker_ids=["0"]
+)
+model = ModelClient(...)
+
+try:
+    obs = client.reset()
+    done = False
+    while not done:
+        # チャンク全体のアクションを生成
+        action_chunk = model.get_action_chunk(obs)
+        # サーバーがチャンクを内部的に実行; 次の再推論ポイントでobsを返す
+        obs, done = client.step(action_chunk)
+finally:
+    client.close()
 ```
 
-2 台目の backend worker を使いたい場合は、別のターミナルを開いて次を実行します。
+異なるIDで複数の評価クライアントを起動できます。例えば：
 
-```bash
-gmp eval \
-  --url "$EBENCH_ONLINE_ENDPOINT" \
-  --token "$EBENCH_SUBMIT_TOKEN" \
-  --run_id "$EBENCH_TASK_ID" \
-  -a r5a \
-  -g lift2 \
-  --chunk_size 40 \
-  --worker_id 1
+```python
+client = EvalClient(
+    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
+    token="$EBENCH_SUBMIT_TOKEN"
+    run_id="9ea5fb6ae980430da626958c4433ea18",
+    worker_ids=["1"]
+)
+...
 ```
 
 サーバーは実行ごとに最大32の同時ワーカーをサポートします。接続は1時間の非アクティブ状態後に終了されます。
@@ -119,6 +128,14 @@ gmp eval \
 ### 5. タスクを監視する
 
 オンラインタスクが作成されると、プラットフォームのページに対応するタスクが表示されます。最終的な評価結果は同じリモートタスク記録に書き込まれます。
+
+ターミナルからサーバーの状態とタスクの進捗を確認することもできます。
+
+```bash
+gmp status \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID"
 
 
 ## オンライン提出 URL

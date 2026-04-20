@@ -88,30 +88,39 @@ Notieren Sie beide Werte:
 
 ### 4. Bewertungs-Worker starten
 
-Fuehren Sie den Evaluator gegen den zurueckgegebenen Endpoint aus.
+Fuehren Sie den Evaluator gegen den zurueckgegebenen Endpoint aus. Dies ist eine Test-Bewertung. Folgen Sie der Dokumentation, um Ihre eigene Modell-Bewertung zu erstellen.
 
-```bash
-gmp eval \
-  --url "$EBENCH_ONLINE_ENDPOINT" \
-  --token "$EBENCH_SUBMIT_TOKEN" \
-  --run_id "$EBENCH_TASK_ID" \
-  -a r5a \
-  -g lift2 \
-  --chunk_size 40 \
-  --worker_id 0
+```python
+client = EvalClient(
+    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
+    token="$EBENCH_SUBMIT_TOKEN"
+    run_id="9ea5fb6ae980430da626958c4433ea18",
+    worker_ids=["0"]
+)
+model = ModelClient(...)
+
+try:
+    obs = client.reset()
+    done = False
+    while not done:
+        # Aktionen fuer den gesamten Chunk generieren
+        action_chunk = model.get_action_chunk(obs)
+        # Server fuehrt Chunk intern aus; gibt obs bei naechster Re-Infer-Punkt zurueck
+        obs, done = client.step(action_chunk)
+finally:
+    client.close()
 ```
 
-Wenn Sie den zweiten Backend-Worker verwenden moechten, oeffnen Sie ein weiteres Terminal und starten Sie:
+Sie koennen mehrere Eval-Clients mit verschiedenen IDs starten. Z. B.
 
-```bash
-gmp eval \
-  --url "$EBENCH_ONLINE_ENDPOINT" \
-  --token "$EBENCH_SUBMIT_TOKEN" \
-  --run_id "$EBENCH_TASK_ID" \
-  -a r5a \
-  -g lift2 \
-  --chunk_size 40 \
-  --worker_id 1
+```python
+client = EvalClient(
+    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
+    token="$EBENCH_SUBMIT_TOKEN"
+    run_id="9ea5fb6ae980430da626958c4433ea18",
+    worker_ids=["1"]
+)
+...
 ```
 
 Der Server unterstuetzt bis zu 32 gleichzeitige Worker pro Lauf. Verbindungen werden nach einer Stunde Inaktivitaet beendet.
@@ -119,6 +128,14 @@ Der Server unterstuetzt bis zu 32 gleichzeitige Worker pro Lauf. Verbindungen we
 ### 5. Aufgabe ueberwachen
 
 Nachdem die Online-Aufgabe erstellt wurde, zeigt die Plattformseite die entsprechende Aufgabe an. Die finalen Bewertungsausgaben werden in denselben entfernten Aufgabeneintrag geschrieben.
+
+Sie koennen den Server-Status und Aufgabenfortschritt auch im Terminal ueberpruefen.
+
+```bash
+gmp status \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID"
 
 
 ## URL fuer die Online-Einreichung
