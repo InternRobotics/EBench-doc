@@ -88,10 +88,15 @@ model = ModelClient()
 
 try:
     obs = client.reset()
-    done = False
-    while not done:
-        action = model.get_action(obs)
-        obs, done = client.step(action)
+    eval_finished = False
+    while not eval_finished:
+        # Reset the model when obs["reset"] is True, since the background task has switched episodes.
+        if obs["reset"]:
+            model.reset()
+        # Generate actions for entire chunk
+        action_chunk = model.get_action_chunk(obs)
+        # Server executes chunk internally; returns obs at next re-inference point
+        obs, eval_finished = client.step(action_chunk)
 finally:
     client.close()
 ```
@@ -99,7 +104,7 @@ finally:
 ## Tipps
 
 - Laden Sie Modellgewichte in `__init__`; halten Sie `get_action` auf die Inferenz fokussiert.
-- Nutzen Sie `reset=True` in `obs`, um den ersten Schritt zu erkennen und rekurrenten/Chunk-Zustand zurueckzusetzen.
+- Nutzen Sie `reset=True` in `obs`, um den ersten Schritt zu erkennen und beim Wechsel der Hintergrundepisode rekurrenten/Chunk-Zustand zurückzusetzen.
 - Bilder sind `uint8` im HWC-Format -- wenden Sie die Normalisierung Ihres Modells vor der Inferenz an.
 - Fuer Action-Chunks koennen Sie verbleibende Aktionen clientseitig zwischenspeichern oder `gmp eval --chunk_size <N>` verwenden.
 - Bei Multi-Worker-Evaluation geben Sie eine Aktion pro `worker_id` zurueck.

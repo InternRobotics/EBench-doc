@@ -88,10 +88,15 @@ model = ModelClient()
 
 try:
     obs = client.reset()
-    done = False
-    while not done:
-        action = model.get_action(obs)
-        obs, done = client.step(action)
+    eval_finished = False
+    while not eval_finished:
+        # Reset the model when obs["reset"] is True, since the background task has switched episodes.
+        if obs["reset"]:
+            model.reset()
+        # Generate actions for entire chunk
+        action_chunk = model.get_action_chunk(obs)
+        # Server executes chunk internally; returns obs at next re-inference point
+        obs, eval_finished = client.step(action_chunk)
 finally:
     client.close()
 ```
@@ -99,7 +104,7 @@ finally:
 ## 팁
 
 - 모델 가중치는 `__init__`에서 로드하고, `get_action`은 추론에만 집중하세요.
-- `obs`의 `reset=True`를 확인하여 첫 스텝을 감지하고 순환 상태나 청크 버퍼를 초기화하세요.
+- `obs`의 `reset=True`를 확인하여 첫 스텝을 감지하고, 백그라운드 작업이 에피소드를 전환할 때 순환 상태 또는 청크 버퍼를 초기화하세요.
 - 이미지는 `uint8` HWC 형식입니다. 추론 전에 모델에 맞는 정규화를 적용하세요.
 - 액션 청크를 출력하는 경우, 나머지 액션을 클라이언트 측에서 캐시하거나 `gmp eval --chunk_size <N>`을 사용하세요.
 - 다중 워커 평가 시, 각 `worker_id`에 대해 하나의 액션을 반환하세요.

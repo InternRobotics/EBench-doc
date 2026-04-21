@@ -88,10 +88,15 @@ model = ModelClient()
 
 try:
     obs = client.reset()
-    done = False
-    while not done:
-        action = model.get_action(obs)
-        obs, done = client.step(action)
+    eval_finished = False
+    while not eval_finished:
+        # Reset the model when obs["reset"] is True, since the background task has switched episodes.
+        if obs["reset"]:
+            model.reset()
+        # Generate actions for entire chunk
+        action_chunk = model.get_action_chunk(obs)
+        # Server executes chunk internally; returns obs at next re-inference point
+        obs, eval_finished = client.step(action_chunk)
 finally:
     client.close()
 ```
@@ -99,7 +104,7 @@ finally:
 ## ヒント
 
 - モデルの重みは `__init__` で読み込み、`get_action` は推論に専念させてください。
-- `obs` 内の `reset=True` を使って最初のステップを検知し、リカレント状態やチャンク状態をクリアしてください。
+- `obs` 内の `reset=True` を使って最初のステップを検知し、バックグラウンドタスクがエピソードを切り替えた際にリカレント状態やチャンク状態をクリアしてください。
 - 画像は `uint8` の HWC 形式です。推論前にモデル固有の正規化を適用してください。
 - アクションチャンクを使用する場合は、残りのアクションをクライアント側でキャッシュするか、`gmp eval --chunk_size <N>` を使用してください。
 - マルチワーカー評価では、`worker_id` ごとに 1 つのアクションを返してください。

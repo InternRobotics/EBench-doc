@@ -88,10 +88,15 @@ model = ModelClient()
 
 try:
     obs = client.reset()
-    done = False
-    while not done:
-        action = model.get_action(obs)
-        obs, done = client.step(action)
+    eval_finished = False
+    while not eval_finished:
+        # Reset the model when obs["reset"] is True, since the background task has switched episodes.
+        if obs["reset"]:
+            model.reset()
+        # Generate actions for entire chunk
+        action_chunk = model.get_action_chunk(obs)
+        # Server executes chunk internally; returns obs at next re-inference point
+        obs, eval_finished = client.step(action_chunk)
 finally:
     client.close()
 ```
@@ -99,7 +104,7 @@ finally:
 ## 提示
 
 - 模型权重在 `__init__` 中加载，`get_action` 只做推理。
-- 用 `obs` 中的 `reset=True` 判断第一步，清空历史状态或 chunk buffer。
+- 用 `obs` 中的 `reset=True` 判断第一步，当后台任务切换到新 episode 时清空历史状态或 chunk 缓冲。
 - 图像是 `uint8` HWC 格式——送入模型前做好归一化。
 - 输出 action chunk 时，可在 client 侧缓存剩余动作，或用 `gmp eval --chunk_size <N>`。
 - 多 worker 评测时，每个 `worker_id` 返回一个动作。

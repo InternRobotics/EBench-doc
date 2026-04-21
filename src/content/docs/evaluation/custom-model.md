@@ -164,12 +164,15 @@ model = ModelClient(chunk_size=4)
 
 try:
     obs = client.reset()
-    done = False
-    while not done:
+    eval_finished = False
+    while not eval_finished:
+        # Reset the model when obs["reset"] is True, since the background task has switched episodes.
+        if obs["reset"]:
+            model.reset()
         # Generate actions for entire chunk
         action_chunk = model.get_action_chunk(obs)
         # Server executes chunk internally; returns obs at next re-inference point
-        obs, done = client.step(action_chunk)
+        obs, eval_finished = client.step(action_chunk)
 finally:
     client.close()
 ```
