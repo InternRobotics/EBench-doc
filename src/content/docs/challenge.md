@@ -123,7 +123,17 @@ client = EvalClient(
 ...
 ```
 
-The server supports up to 32 concurrent workers per run. Connections will be terminated after one hour of inactivity.
+The server supports up to 16 concurrent workers per run. Connections will be terminated after ten minutes of inactivity. You can restart a failed evaluation submission by using the same task_id.
+```bash
+# restart above task
+gmp online submit \
+  --base_url https://internrobotics.shlab.org.cn/eval \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --task_id 9ea5fb6ae980430da626958c4433ea18 \
+  # ...
+```
+
+If you encounter connection timeouts, restart the client to recover.
 
 ### 5. Monitor the task
 

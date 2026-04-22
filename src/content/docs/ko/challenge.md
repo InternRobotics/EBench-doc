@@ -123,7 +123,17 @@ client = EvalClient(
 ...
 ```
 
-서버는 실행당 최대 32개의 동시 워커를 지원합니다. 연결은 1시간 비활성 상태 후에 종료됩니다.
+서버는 실행당 최대 16개의 동시 워커를 지원합니다. 연결은 10분 비활성 상태 후에 종료됩니다. 동일한 task_id를 사용하여 실패한 평가 제출을 다시 시작할 수 있습니다.
+```bash
+# 위 작업 다시 시작
+gmp online submit \
+  --base_url https://internrobotics.shlab.org.cn/eval \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --task_id 9ea5fb6ae980430da626958c4433ea18 \
+  # ...
+```
+
+연결 타임아웃이 발생하면 클라이언트를 다시 시작하여 연결을 복구하세요.
 
 ### 5. 작업 상태 확인
 

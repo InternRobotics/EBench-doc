@@ -123,9 +123,17 @@ client = EvalClient(
 ...
 ```
 
-Le serveur prend en charge jusqu'à 32 workers simultanes par execution. Les connexions seront terminees apres une heure d'inactivite.
+Le serveur prend en charge jusqu'à 16 travailleurs simultanés par exécution. Les connexions seront terminées après dix minutes d'inactivité. Vous pouvez redémarrer une soumission d'évaluation échouée en utilisant le même task_id.
+```bash
+# redémarrer la tâche ci-dessus
+gmp online submit \
+  --base_url https://internrobotics.shlab.org.cn/eval \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --task_id 9ea5fb6ae980430da626958c4433ea18 \
+  # ...
+```
 
-### 5. Suivre la tache
+Si vous rencontrez des délais d'attente de connexion, redémarrez le client pour récupérer.
 
 Une fois la tache en ligne creee, la page de la plateforme affichera la tache correspondante. Les sorties finales de l'evaluation sont ecrites dans le meme enregistrement de tache distante.
 

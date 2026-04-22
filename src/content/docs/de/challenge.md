@@ -123,9 +123,17 @@ client = EvalClient(
 ...
 ```
 
-Der Server unterstuetzt bis zu 32 gleichzeitige Worker pro Lauf. Verbindungen werden nach einer Stunde Inaktivitaet beendet.
+Der Server unterstützt bis zu 16 gleichzeitige Worker pro Lauf. Verbindungen werden nach zehn Minuten Inaktivität beendet. Sie können eine fehlgeschlagene Evaluierungseinreichung neu starten, indem Sie die gleiche task_id verwenden.
+```bash
+# Aufgabe oben neu starten
+gmp online submit \
+  --base_url https://internrobotics.shlab.org.cn/eval \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --task_id 9ea5fb6ae980430da626958c4433ea18 \
+  # ...
+```
 
-### 5. Aufgabe ueberwachen
+Wenn Sie Verbindungs-Timeouts feststellen, starten Sie den Client neu, um die Verbindung wiederherzustellen.
 
 Nachdem die Online-Aufgabe erstellt wurde, zeigt die Plattformseite die entsprechende Aufgabe an. Die finalen Bewertungsausgaben werden in denselben entfernten Aufgabeneintrag geschrieben.
 

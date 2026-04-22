@@ -123,7 +123,17 @@ client = EvalClient(
 ...
 ```
 
-服务器每个运行最多支持32个并发worker。连接在闲置一小时后将被断开。
+服务器每个运行最多支持16个并发worker。连接在闲置十分钟后将被断开。您可以使用相同的task_id重新启动失败的评估提交。
+```bash
+# 重新启动上述任务
+gmp online submit \
+  --base_url https://internrobotics.shlab.org.cn/eval \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --task_id 9ea5fb6ae980430da626958c4433ea18 \
+  # ...
+```
+
+如果遇到连接超时问题，请重启客户端以恢复连接。
 
 ### 5. 监控任务状态
 
