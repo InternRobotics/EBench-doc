@@ -25,7 +25,7 @@ El flujo en linea tiene tres etapas: crear una tarea en linea, esperar el endpoi
 Abre la pagina principal de la plataforma:
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval/landing-page
+https://internrobotics.shlab.org.cn/eval/landing-page
 ```
 
 Luego:

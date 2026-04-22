@@ -25,7 +25,7 @@ Le flux en ligne comporte trois etapes : creer une tache en ligne, attendre l'en
 Ouvrez la page d'accueil de la plateforme :
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval/landing-page
+https://internrobotics.shlab.org.cn/eval/landing-page
 ```
 
 Ensuite :

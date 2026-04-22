@@ -25,7 +25,7 @@ Der Online-Ablauf hat drei Phasen: eine Online-Aufgabe erstellen, auf den Bewert
 Oeffnen Sie die Startseite der Plattform:
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval/landing-page
+https://internrobotics.shlab.org.cn/eval/landing-page
 ```
 
 Dann:
