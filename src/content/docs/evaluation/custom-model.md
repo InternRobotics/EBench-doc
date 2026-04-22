@@ -16,7 +16,7 @@ Implement a `ModelClient`, do one inference pass in `get_action(obs)`, and retur
 Each observation is keyed by `worker_id`:
 
 ```python
-obs["0"]["obs"] = {
+obs["worker_id"]["obs"] = {
     "instruction": str,                        # language instruction
     "state.joints": np.ndarray,                # (12,) joint positions
     "state.gripper": np.ndarray,               # (4,) gripper states
@@ -76,7 +76,7 @@ class ModelClient:
     def __init__(self):
         pass  # Load your model here
 
-    def get_action(self, obs):
+    def get_action_chunk(self, obs):
         worker_id = next(iter(obs))
         worker_obs = obs[worker_id]["obs"]
 
@@ -86,19 +86,22 @@ class ModelClient:
         gripper = worker_obs["state.gripper"]
         base = worker_obs["state.base"]
 
-        # Your inference here
-        pred_action = np.zeros(16, dtype=np.float32)
+        # Your inference here, i.e. action with 6 left joints + 2 left grip + 6 right joints + 2 right grip, 3 base motion states
+        pred_action_chunk = np.zeros(16+3, dtype=np.float32)
 
         return {
             worker_id: {
-                "action": pred_action,
-                "base_motion": np.zeros(3, dtype=np.float32),
+                "action": pred_action[:16],
+                "base_motion": pred_action[16:],
                 "control_type": "joint_position",
                 "is_rel": False,
                 "base_is_rel": True,
             }
         }
 
+    def reset(self):
+        # based on your model, clean the history and reset to new episode
+        pass
 
 client = EvalClient(
     base_url="http://127.0.0.1:8087",
@@ -109,10 +112,13 @@ model = ModelClient()
 
 try:
     obs = client.reset()
-    done = False
-    while not done:
+    eval_finished = False
+    while not eval_finished:
+        # Reset the model when obs["reset"] is True, since the background task has switched episodes.
+        if obs[worker_ids]["obs"]["reset"]:
+            model.reset()
         action = model.get_action(obs)
-        obs, done = client.step(action)
+        obs, eval_finished = client.step(action)
 finally:
     client.close()
 ```
@@ -140,20 +146,26 @@ class ModelClient:
         gripper = worker_obs["state.gripper"]
         base = worker_obs["state.base"]
 
-        # Your inference here: generate chunk_size actions at once
+        # Your inference here, i.e. a length chunk_size action chunk with 6 left joints + 2 left grip + 6 right joints + 2 right grip, 3 base motion states
+        pred_action_chunk = np.zeros((self.chunk_size, 16+3), dtype=np.float32)
+
+        # convet to action chunk format
         action_chunk = []
-        for _ in range(self.chunk_size):
-            pred_action = np.zeros(16, dtype=np.float32)
+        for i in range(self.chunk_size):
             action_chunk.append({
-                "action": pred_action,
-                "base_motion": np.zeros(3, dtype=np.float32),
-                "control_type": "joint_position",
-                "is_rel": False,
-                "base_is_rel": True,
-            })
-        
+                worker_id: {
+                    "action": pred_action_chunk[i][:16],
+                    "base_motion": pred_action_chunk[i][16:],
+                    "control_type": "joint_position",
+                    }
+                }
+            )
+
         return action_chunk
 
+    def reset(self):
+        # based on your model, clean the history and reset to new episode
+        pass
 
 client = EvalClient(
     base_url="http://127.0.0.1:8087",
@@ -167,7 +179,7 @@ try:
     eval_finished = False
     while not eval_finished:
         # Reset the model when obs["reset"] is True, since the background task has switched episodes.
-        if obs["reset"]:
+        if obs[worker_ids]["obs"]["reset"]:
             model.reset()
         # Generate actions for entire chunk
         action_chunk = model.get_action_chunk(obs)

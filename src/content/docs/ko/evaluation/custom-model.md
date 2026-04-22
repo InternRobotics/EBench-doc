@@ -44,7 +44,7 @@ action = {
 
 `ee_pose` 제어를 사용할 수도 있습니다. `control_type`을 `"ee_pose"`로 설정하고, 관절 위치 대신 `[pos, quat, gripper]` 쌍을 제공하면 됩니다.
 
-## 최소 예제
+## 예제: 단일 단계 모드
 
 ```python
 import numpy as np
@@ -55,7 +55,7 @@ class ModelClient:
     def __init__(self):
         pass  # 여기에서 모델을 로드하세요
 
-    def get_action(self, obs):
+    def get_action_chunk(self, obs):
         worker_id = next(iter(obs))
         worker_obs = obs[worker_id]["obs"]
 
@@ -65,19 +65,22 @@ class ModelClient:
         gripper = worker_obs["state.gripper"]
         base = worker_obs["state.base"]
 
-        # 여기에 추론 로직을 작성하세요
-        pred_action = np.zeros(16, dtype=np.float32)
+        # 여기에 추론 로직을 작성하세요, 즉 왼팔 관절 6 + 왼쪽 그리퍼 2 + 오른팔 관절 6 + 오른쪽 그리퍼 2, 3개의 베이스 모션 상태의 액션
+        pred_action_chunk = np.zeros(16+3, dtype=np.float32)
 
         return {
             worker_id: {
-                "action": pred_action,
-                "base_motion": np.zeros(3, dtype=np.float32),
+                "action": pred_action[:16],
+                "base_motion": pred_action[16:],
                 "control_type": "joint_position",
                 "is_rel": False,
                 "base_is_rel": True,
             }
         }
 
+    def reset(self):
+        # 모델에 기반하여, 기록을 정리하고 새 에피소드로 재설정
+        pass
 
 client = EvalClient(
     base_url="http://127.0.0.1:8087",
@@ -90,12 +93,76 @@ try:
     obs = client.reset()
     eval_finished = False
     while not eval_finished:
-        # Reset the model when obs["reset"] is True, since the background task has switched episodes.
-        if obs["reset"]:
+        # obs["reset"]가 True일 때, 백그라운드 작업이 에피소드를 전환했으므로 모델을 재설정하세요.
+        if obs[list(obs.keys())[0]]["obs"]["reset"]:
             model.reset()
-        # Generate actions for entire chunk
+        action = model.get_action(obs)
+        obs, eval_finished = client.step(action)
+finally:
+    client.close()
+```
+
+## 예제: 청크 모드 (권장)
+
+```python
+import numpy as np
+from genmanip_client.eval_client import EvalClient
+
+
+class ModelClient:
+    def __init__(self, chunk_size: int = 4):
+        self.chunk_size = chunk_size
+        pass  # 여기에서 모델을 로드하세요
+
+    def get_action_chunk(self, obs):
+        """액션 청크를 생성합니다."""
+        worker_id = next(iter(obs))
+        worker_obs = obs[worker_id]["obs"]
+
+        instruction = worker_obs["instruction"]
+        image = worker_obs["video.front_view"]
+        joints = worker_obs["state.joints"]
+        gripper = worker_obs["state.gripper"]
+        base = worker_obs["state.base"]
+
+        # 여기에 추론 로직을 작성하세요, 즉 chunk_size 길이의 청크로 왼팔 관절 6 + 왼쪽 그리퍼 2 + 오른팔 관절 6 + 오른쪽 그리퍼 2, 3개의 베이스 모션 상태
+        pred_action_chunk = np.zeros((self.chunk_size, 16+3), dtype=np.float32)
+
+        # 액션 청크 형식으로 변환
+        action_chunk = []
+        for i in range(self.chunk_size):
+            action_chunk.append({
+                worker_id: {
+                    "action": pred_action_chunk[i][:16],
+                    "base_motion": pred_action_chunk[i][16:],
+                    "control_type": "joint_position",
+                    }
+                }
+            )
+
+        return action_chunk
+
+    def reset(self):
+        # 모델에 기반하여, 기록을 정리하고 새 에피소드로 재설정
+        pass
+
+client = EvalClient(
+    base_url="http://127.0.0.1:8087",
+    worker_ids=["0"],
+    run_id="my_eval",
+)
+model = ModelClient(chunk_size=4)
+
+try:
+    obs = client.reset()
+    eval_finished = False
+    while not eval_finished:
+        # obs["reset"]가 True일 때, 백그라운드 작업이 에피소드를 전환했으므로 모델을 재설정하세요.
+        if obs[list(obs.keys())[0]]["obs"]["reset"]:
+            model.reset()
+        # 전체 청크에 대한 액션을 생성
         action_chunk = model.get_action_chunk(obs)
-        # Server executes chunk internally; returns obs at next re-inference point
+        # 서버가 청크를 내부적으로 실행; 다음 재추론 지점에서 obs를 반환
         obs, eval_finished = client.step(action_chunk)
 finally:
     client.close()

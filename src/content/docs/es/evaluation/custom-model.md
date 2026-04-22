@@ -44,7 +44,7 @@ action = {
 
 Alternativamente, puedes usar el control por `ee_pose` estableciendo `control_type` a `"ee_pose"` y proporcionando pares `[pos, quat, gripper]` en lugar de posiciones articulares.
 
-## Ejemplo mínimo
+## Ejemplo: Modo de paso único
 
 ```python
 import numpy as np
@@ -55,7 +55,7 @@ class ModelClient:
     def __init__(self):
         pass  # Carga tu modelo aquí
 
-    def get_action(self, obs):
+    def get_action_chunk(self, obs):
         worker_id = next(iter(obs))
         worker_obs = obs[worker_id]["obs"]
 
@@ -65,19 +65,22 @@ class ModelClient:
         gripper = worker_obs["state.gripper"]
         base = worker_obs["state.base"]
 
-        # Tu inferencia aquí
-        pred_action = np.zeros(16, dtype=np.float32)
+        # Tu inferencia aquí, es decir, acción con 6 articulaciones izquierdas + 2 grip izquierdo + 6 articulaciones derechas + 2 grip derecho, 3 estados de movimiento base
+        pred_action_chunk = np.zeros(16+3, dtype=np.float32)
 
         return {
             worker_id: {
-                "action": pred_action,
-                "base_motion": np.zeros(3, dtype=np.float32),
+                "action": pred_action[:16],
+                "base_motion": pred_action[16:],
                 "control_type": "joint_position",
                 "is_rel": False,
                 "base_is_rel": True,
             }
         }
 
+    def reset(self):
+        # basado en tu modelo, limpia el historial y reinicia a nuevo episodio
+        pass
 
 client = EvalClient(
     base_url="http://127.0.0.1:8087",
@@ -90,12 +93,76 @@ try:
     obs = client.reset()
     eval_finished = False
     while not eval_finished:
-        # Reset the model when obs["reset"] is True, since the background task has switched episodes.
-        if obs["reset"]:
+        # Reinicia el modelo cuando obs["reset"] es True, ya que la tarea en segundo plano cambió de episodios.
+        if obs[list(obs.keys())[0]]["obs"]["reset"]:
             model.reset()
-        # Generate actions for entire chunk
+        action = model.get_action(obs)
+        obs, eval_finished = client.step(action)
+finally:
+    client.close()
+```
+
+## Ejemplo: Modo chunk (recomendado)
+
+```python
+import numpy as np
+from genmanip_client.eval_client import EvalClient
+
+
+class ModelClient:
+    def __init__(self, chunk_size: int = 4):
+        self.chunk_size = chunk_size
+        pass  # Carga tu modelo aquí
+
+    def get_action_chunk(self, obs):
+        """Genera un chunk de acciones."""
+        worker_id = next(iter(obs))
+        worker_obs = obs[worker_id]["obs"]
+
+        instruction = worker_obs["instruction"]
+        image = worker_obs["video.front_view"]
+        joints = worker_obs["state.joints"]
+        gripper = worker_obs["state.gripper"]
+        base = worker_obs["state.base"]
+
+        # Tu inferencia aquí, es decir, un chunk de longitud chunk_size con 6 articulaciones izquierdas + 2 grip izquierdo + 6 articulaciones derechas + 2 grip derecho, 3 estados de movimiento base
+        pred_action_chunk = np.zeros((self.chunk_size, 16+3), dtype=np.float32)
+
+        # convertir a formato de chunk de acción
+        action_chunk = []
+        for i in range(self.chunk_size):
+            action_chunk.append({
+                worker_id: {
+                    "action": pred_action_chunk[i][:16],
+                    "base_motion": pred_action_chunk[i][16:],
+                    "control_type": "joint_position",
+                    }
+                }
+            )
+
+        return action_chunk
+
+    def reset(self):
+        # basado en tu modelo, limpia el historial y reinicia a nuevo episodio
+        pass
+
+client = EvalClient(
+    base_url="http://127.0.0.1:8087",
+    worker_ids=["0"],
+    run_id="my_eval",
+)
+model = ModelClient(chunk_size=4)
+
+try:
+    obs = client.reset()
+    eval_finished = False
+    while not eval_finished:
+        # Reinicia el modelo cuando obs["reset"] es True, ya que la tarea en segundo plano cambió de episodios.
+        if obs[list(obs.keys())[0]]["obs"]["reset"]:
+            model.reset()
+        # Genera acciones para todo el chunk
         action_chunk = model.get_action_chunk(obs)
-        # Server executes chunk internally; returns obs at next re-inference point
+        # El servidor ejecuta el chunk internamente; devuelve obs en el siguiente punto de re-inferencia
         obs, eval_finished = client.step(action_chunk)
 finally:
     client.close()

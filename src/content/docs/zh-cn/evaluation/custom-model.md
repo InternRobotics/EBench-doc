@@ -44,7 +44,7 @@ action = {
 
 也可以使用 `ee_pose` 控制：将 `control_type` 设为 `"ee_pose"`，`action` 改为 `[pos, quat, gripper]` 对。
 
-## 最小示例
+## 示例：单步模式
 
 ```python
 import numpy as np
@@ -55,7 +55,7 @@ class ModelClient:
     def __init__(self):
         pass  # 在这里加载模型
 
-    def get_action(self, obs):
+    def get_action_chunk(self, obs):
         worker_id = next(iter(obs))
         worker_obs = obs[worker_id]["obs"]
 
@@ -65,19 +65,22 @@ class ModelClient:
         gripper = worker_obs["state.gripper"]
         base = worker_obs["state.base"]
 
-        # 你的推理逻辑
-        pred_action = np.zeros(16, dtype=np.float32)
+        # 你的推理逻辑，即动作包含6个左臂关节 + 2个左夹爪 + 6个右臂关节 + 2个右夹爪，3个底盘运动状态
+        pred_action_chunk = np.zeros(16+3, dtype=np.float32)
 
         return {
             worker_id: {
-                "action": pred_action,
-                "base_motion": np.zeros(3, dtype=np.float32),
+                "action": pred_action[:16],
+                "base_motion": pred_action[16:],
                 "control_type": "joint_position",
                 "is_rel": False,
                 "base_is_rel": True,
             }
         }
 
+    def reset(self):
+        # 根据你的模型，清理历史记录并重置到新episode
+        pass
 
 client = EvalClient(
     base_url="http://127.0.0.1:8087",
@@ -90,12 +93,76 @@ try:
     obs = client.reset()
     eval_finished = False
     while not eval_finished:
-        # Reset the model when obs["reset"] is True, since the background task has switched episodes.
-        if obs["reset"]:
+        # 当obs["reset"]为True时重置模型，因为后台任务已切换episode。
+        if obs[list(obs.keys())[0]]["obs"]["reset"]:
             model.reset()
-        # Generate actions for entire chunk
+        action = model.get_action(obs)
+        obs, eval_finished = client.step(action)
+finally:
+    client.close()
+```
+
+## 示例：块模式（推荐）
+
+```python
+import numpy as np
+from genmanip_client.eval_client import EvalClient
+
+
+class ModelClient:
+    def __init__(self, chunk_size: int = 4):
+        self.chunk_size = chunk_size
+        pass  # 在这里加载模型
+
+    def get_action_chunk(self, obs):
+        """生成动作块。"""
+        worker_id = next(iter(obs))
+        worker_obs = obs[worker_id]["obs"]
+
+        instruction = worker_obs["instruction"]
+        image = worker_obs["video.front_view"]
+        joints = worker_obs["state.joints"]
+        gripper = worker_obs["state.gripper"]
+        base = worker_obs["state.base"]
+
+        # 你的推理逻辑，即长度为chunk_size的块，包含6个左臂关节 + 2个左夹爪 + 6个右臂关节 + 2个右夹爪，3个底盘运动状态
+        pred_action_chunk = np.zeros((self.chunk_size, 16+3), dtype=np.float32)
+
+        # 转换为动作块格式
+        action_chunk = []
+        for i in range(self.chunk_size):
+            action_chunk.append({
+                worker_id: {
+                    "action": pred_action_chunk[i][:16],
+                    "base_motion": pred_action_chunk[i][16:],
+                    "control_type": "joint_position",
+                    }
+                }
+            )
+
+        return action_chunk
+
+    def reset(self):
+        # 根据你的模型，清理历史记录并重置到新episode
+        pass
+
+client = EvalClient(
+    base_url="http://127.0.0.1:8087",
+    worker_ids=["0"],
+    run_id="my_eval",
+)
+model = ModelClient(chunk_size=4)
+
+try:
+    obs = client.reset()
+    eval_finished = False
+    while not eval_finished:
+        # 当obs["reset"]为True时重置模型，因为后台任务已切换episode。
+        if obs[list(obs.keys())[0]]["obs"]["reset"]:
+            model.reset()
+        # 为整个块生成动作
         action_chunk = model.get_action_chunk(obs)
-        # Server executes chunk internally; returns obs at next re-inference point
+        # 服务器在内部执行块；在下一个重新推理点返回obs
         obs, eval_finished = client.step(action_chunk)
 finally:
     client.close()
