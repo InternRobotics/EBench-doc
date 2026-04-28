@@ -77,7 +77,7 @@ Sobald die Backend-Aufgabe bereit ist, gibt der Befehl Felder wie diese zurueck:
 ```json
 {
   "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics-staging.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
 }
 ```
 
@@ -135,6 +135,8 @@ gmp online submit \
 
 Wenn Sie Verbindungs-Timeouts feststellen, starten Sie den Client neu, um die Verbindung wiederherzustellen.
 
+### 5. Aufgabe ueberwachen
+
 Nachdem die Online-Aufgabe erstellt wurde, zeigt die Plattformseite die entsprechende Aufgabe an. Die finalen Bewertungsausgaben werden in denselben entfernten Aufgabeneintrag geschrieben.
 
 Sie koennen den Server-Status und Aufgabenfortschritt auch im Terminal ueberpruefen.
@@ -144,21 +146,28 @@ gmp status \
   --url "$EBENCH_ONLINE_ENDPOINT" \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --run_id "$EBENCH_TASK_ID"
-
+```
 
 ## URL fuer die Online-Einreichung
 
 Erstellen Sie Aufgaben ueber die offizielle Plattform-Base-URL:
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval
+https://internrobotics.shlab.org.cn/eval
 ```
 
 Verwenden Sie nach `gmp online submit` den zurueckgegebenen aufgabenspezifischen Endpoint fuer die Bewertung:
 
 ```text
-https://internrobotics-staging.shlab.org.cn/evalserver/<task-endpoint>
+https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
 ```
+
+## Bewertungsregeln
+
+- Jede bewertete Episode erzeugt eine Aufgabenpunktzahl zwischen `0.0` und `1.0`.
+- Eine Aufgabe erhaelt die volle Punktzahl, wenn die geforderte Zielbedingung innerhalb der Episode erfuellt wird; andernfalls erhaelt sie `0.0`.
+- Die Leaderboard-Punktzahl ist der Durchschnitt der Aufgabenpunktzahlen ueber alle bewerteten Episoden im eingereichten Benchmark-Set.
+- Fuer aufgabenspezifische Erfolgsdefinitionen siehe [Aufgabenuebersicht](/de/evaluation/task-showcase/), wo jede Aufgabe ihre Beschreibungen zu `Location`, `Instruction` und `Score` enthaelt.
 
 ## Beispiel-Checkliste
 

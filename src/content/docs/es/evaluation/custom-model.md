@@ -44,6 +44,27 @@ action = {
 
 Alternativamente, puedes usar el control por `ee_pose` estableciendo `control_type` a `"ee_pose"` y proporcionando pares `[pos, quat, gripper]` en lugar de posiciones articulares.
 
+## Modo chunk (recomendado)
+
+**Enfoque preferido:** En lugar de llamar a `client.step()` con una sola acción por paso, envía chunks de acciones para obtener mejor rendimiento:
+
+```python
+# Envía una lista de acciones como un chunk
+actions = [action_dict_1, action_dict_2, action_dict_3]
+obs, done = client.step(actions)
+```
+
+**Beneficios:** El servidor ejecuta todas las acciones del chunk internamente y devuelve solo la observación final en el punto de re-inferencia, reduciendo la sobrecarga de red y permitiendo un mejor ajuste del rendimiento.
+
+**Evaluación multi-worker:** Para múltiples workers, simplemente ejecuta procesos separados con diferentes `worker_ids`:
+```bash
+# Terminal 1: worker "0"
+python model_client.py --worker_id 0
+
+# Terminal 2: worker "1"
+python model_client.py --worker_id 1
+```
+
 ## Ejemplo: Modo de paso único
 
 ```python
@@ -170,6 +191,7 @@ finally:
 
 ## Consejos
 
+- **Usa el modo chunk para mejor rendimiento**: Envía listas de acciones mediante `client.step()` en lugar de acciones individuales. El servidor las ejecuta internamente y devuelve solo la observación final en el punto de re-inferencia. Solo funciona con servidores que tengan la flag --no_save_process.
 - Carga los pesos del modelo en `__init__` y mantén `get_action` centrado en la inferencia.
 - Usa `reset=True` en `obs` para detectar el primer paso y, cuando la tarea en segundo plano cambie de episodio, limpiar el estado recurrente o el buffer de chunk.
 - Las imágenes son `uint8` en formato HWC: aplica la normalización de tu modelo antes de la inferencia.

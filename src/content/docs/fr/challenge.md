@@ -77,7 +77,7 @@ Une fois la tache backend prete, la commande renvoie des champs comme ceux-ci :
 ```json
 {
   "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics-staging.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
 }
 ```
 
@@ -135,6 +135,8 @@ gmp online submit \
 
 Si vous rencontrez des délais d'attente de connexion, redémarrez le client pour récupérer.
 
+### 5. Surveiller la tache
+
 Une fois la tache en ligne creee, la page de la plateforme affichera la tache correspondante. Les sorties finales de l'evaluation sont ecrites dans le meme enregistrement de tache distante.
 
 Vous pouvez egalement verifier l'etat du serveur et la progression de la tache a partir du terminal.
@@ -144,21 +146,28 @@ gmp status \
   --url "$EBENCH_ONLINE_ENDPOINT" \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --run_id "$EBENCH_TASK_ID"
-
+```
 
 ## URL de soumission en ligne
 
 Creez les taches via l'URL de base officielle de la plateforme :
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval
+https://internrobotics.shlab.org.cn/eval
 ```
 
 Apres `gmp online submit`, utilisez l'endpoint renvoye pour cette tache afin d'effectuer l'evaluation :
 
 ```text
-https://internrobotics-staging.shlab.org.cn/evalserver/<task-endpoint>
+https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
 ```
+
+## Regles de notation
+
+- Chaque episode evalue produit un score de tache compris entre `0.0` et `1.0`.
+- Une tache obtient le score maximal lorsque la condition d'objectif requise est remplie au cours de l'episode ; sinon, elle obtient `0.0`.
+- Le score du classement est la moyenne des scores de tache sur les episodes evalues dans l'ensemble de benchmark soumis.
+- Pour la semantique de reussite specifique a chaque tache, consultez [Vitrine des taches](/fr/evaluation/task-showcase/), ou chaque tache inclut sa description `Location`, `Instruction` et `Score`.
 
 ## Checklist d'exemple
 

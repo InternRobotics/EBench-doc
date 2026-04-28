@@ -44,6 +44,27 @@ action = {
 
 `ee_pose` 제어를 사용할 수도 있습니다. `control_type`을 `"ee_pose"`로 설정하고, 관절 위치 대신 `[pos, quat, gripper]` 쌍을 제공하면 됩니다.
 
+## 청크 모드 (권장)
+
+**권장 방법:** 매 스텝마다 단일 액션으로 `client.step()` 을 호출하는 대신, 더 나은 성능을 위해 액션 청크를 제출하세요.
+
+```python
+# 액션 리스트를 청크로 제출
+actions = [action_dict_1, action_dict_2, action_dict_3]
+obs, done = client.step(actions)
+```
+
+**이점:** 서버는 청크 내의 모든 액션을 내부적으로 실행하고 재추론 지점에서 최종 관측만 반환하므로, 네트워크 오버헤드를 줄이고 더 나은 성능 튜닝을 가능하게 합니다.
+
+**다중 워커 평가:** 여러 워커의 경우, 서로 다른 `worker_ids` 로 별도의 프로세스를 실행하면 됩니다.
+```bash
+# 터미널 1: worker "0"
+python model_client.py --worker_id 0
+
+# 터미널 2: worker "1"
+python model_client.py --worker_id 1
+```
+
 ## 예제: 단일 단계 모드
 
 ```python
@@ -170,6 +191,7 @@ finally:
 
 ## 팁
 
+- **더 나은 성능을 위해 청크 모드를 사용하세요**: 단일 액션 대신 `client.step()` 을 통해 액션 리스트를 제출하세요. 서버는 이를 내부적으로 실행하고 재추론 지점에서 최종 관측만 반환합니다. --no_save_process 플래그가 설정된 서버에서만 동작합니다.
 - 모델 가중치는 `__init__`에서 로드하고, `get_action`은 추론에만 집중하세요.
 - `obs`의 `reset=True`를 확인하여 첫 스텝을 감지하고, 백그라운드 작업이 에피소드를 전환할 때 순환 상태 또는 청크 버퍼를 초기화하세요.
 - 이미지는 `uint8` HWC 형식입니다. 추론 전에 모델에 맞는 정규화를 적용하세요.

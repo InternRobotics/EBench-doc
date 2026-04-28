@@ -77,7 +77,7 @@ Cuando la tarea del backend este lista, el comando devuelve campos como estos:
 ```json
 {
   "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics-staging.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
 }
 ```
 
@@ -135,6 +135,8 @@ gmp online submit \
 
 Si encuentra tiempos de espera de conexión, reinicie el cliente para recuperarlo.
 
+### 5. Monitorear la tarea
+
 Despues de crear la tarea en linea, la pagina de la plataforma mostrara la tarea correspondiente. Los resultados finales de la evaluacion se escriben en el mismo registro remoto de la tarea.
 
 Tambien puedes verificar el estado del servidor y el progreso de la tarea desde la terminal.
@@ -144,21 +146,28 @@ gmp status \
   --url "$EBENCH_ONLINE_ENDPOINT" \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --run_id "$EBENCH_TASK_ID"
-
+```
 
 ## URL de envio en linea
 
 Crea tareas mediante la URL base oficial de la plataforma:
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval
+https://internrobotics.shlab.org.cn/eval
 ```
 
 Despues de `gmp online submit`, usa el endpoint devuelto para esa tarea en la evaluacion:
 
 ```text
-https://internrobotics-staging.shlab.org.cn/evalserver/<task-endpoint>
+https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
 ```
+
+## Reglas de puntuación
+
+- Cada episodio evaluado produce una puntuación de tarea entre `0.0` y `1.0`.
+- Una tarea recibe la puntuación máxima cuando la condición objetivo requerida se completa dentro del episodio; de lo contrario, recibe `0.0`.
+- La puntuación del leaderboard es la puntuación promedio de las tareas a lo largo de los episodios evaluados en el conjunto de benchmark enviado.
+- Para conocer la semántica específica de éxito por tarea, consulta [Vitrina de tareas](/es/evaluation/task-showcase/), donde cada tarea incluye su descripción de `Location`, `Instruction` y `Score`.
 
 ## Lista de verificacion de ejemplo
 

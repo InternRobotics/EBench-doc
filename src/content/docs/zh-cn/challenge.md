@@ -146,7 +146,7 @@ gmp status \
   --url "$EBENCH_ONLINE_ENDPOINT" \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --run_id "$EBENCH_TASK_ID"
-
+```
 
 ## 在线提交 URL
 

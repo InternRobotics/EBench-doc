@@ -77,7 +77,7 @@ gmp online submit \
 ```json
 {
   "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics-staging.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
 }
 ```
 
@@ -146,21 +146,28 @@ gmp status \
   --url "$EBENCH_ONLINE_ENDPOINT" \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --run_id "$EBENCH_TASK_ID"
-
+```
 
 ## オンライン提出 URL
 
 公式プラットフォームの base URL を使ってタスクを作成します。
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval
+https://internrobotics.shlab.org.cn/eval
 ```
 
 `gmp online submit` の後は、返されたタスク専用 endpoint を評価に使用します。
 
 ```text
-https://internrobotics-staging.shlab.org.cn/evalserver/<task-endpoint>
+https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
 ```
+
+## スコアリングルール
+
+- 評価される各 episode は `0.0` から `1.0` の範囲のタスクスコアを生成します。
+- 該当の episode 内で要求された目標条件を達成した場合、タスクは満点となります。それ以外の場合は `0.0` となります。
+- リーダーボードのスコアは、提出された benchmark セット内の評価された episode のタスクスコアの平均値です。
+- タスクごとの成功条件の詳細については [タスクショーケース](/ja/evaluation/task-showcase/) を参照してください。各タスクには `Location`、`Instruction`、`Score` の説明が記載されています。
 
 ## チェックリスト例
 

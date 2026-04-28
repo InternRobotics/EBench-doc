@@ -77,7 +77,7 @@ gmp online submit \
 ```json
 {
   "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics-staging.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
 }
 ```
 
@@ -146,21 +146,28 @@ gmp status \
   --url "$EBENCH_ONLINE_ENDPOINT" \
   --token "$EBENCH_SUBMIT_TOKEN" \
   --run_id "$EBENCH_TASK_ID"
-
+```
 
 ## 온라인 제출 URL
 
 공식 플랫폼 base URL 을 통해 작업을 생성합니다.
 
 ```text
-https://internrobotics-staging.shlab.org.cn/eval
+https://internrobotics.shlab.org.cn/eval
 ```
 
 `gmp online submit` 이후에는 반환된 작업별 endpoint 를 평가에 사용합니다.
 
 ```text
-https://internrobotics-staging.shlab.org.cn/evalserver/<task-endpoint>
+https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
 ```
+
+## 점수 규칙
+
+- 평가된 각 에피소드는 `0.0` 에서 `1.0` 사이의 작업 점수를 생성합니다.
+- 에피소드 내에서 요구되는 목표 조건이 완료되면 해당 작업은 만점을 받고, 그렇지 않으면 `0.0` 을 받습니다.
+- 리더보드 점수는 제출된 benchmark 세트의 평가된 에피소드 전체에 대한 작업 점수의 평균입니다.
+- 작업별 성공 기준에 대한 자세한 내용은 [작업 쇼케이스](/ko/evaluation/task-showcase/) 를 참조하세요. 각 작업에는 `Location`, `Instruction`, `Score` 설명이 포함되어 있습니다.
 
 ## 예시 체크리스트
 

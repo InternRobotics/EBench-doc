@@ -44,6 +44,27 @@ action = {
 
 Vous pouvez également utiliser le contrôle `ee_pose` en définissant `control_type` sur `"ee_pose"` et en fournissant des paires `[pos, quat, gripper]` au lieu de positions articulaires.
 
+## Mode chunk (recommandé)
+
+**Approche préférée :** Au lieu d'appeler `client.step()` avec une seule action par pas, soumettez des chunks d'actions pour de meilleures performances :
+
+```python
+# Soumettez une liste d'actions sous forme de chunk
+actions = [action_dict_1, action_dict_2, action_dict_3]
+obs, done = client.step(actions)
+```
+
+**Avantages :** Le serveur exécute toutes les actions du chunk en interne et ne renvoie que l'observation finale au point de ré-inférence, réduisant la surcharge réseau et permettant un meilleur réglage des performances.
+
+**Évaluation multi-worker :** Pour plusieurs workers, exécutez simplement des processus distincts avec différents `worker_ids` :
+```bash
+# Terminal 1 : worker "0"
+python model_client.py --worker_id 0
+
+# Terminal 2 : worker "1"
+python model_client.py --worker_id 1
+```
+
 ## Exemple : Mode pas unique
 
 ```python
@@ -170,6 +191,7 @@ finally:
 
 ## Conseils
 
+- **Utilisez le mode chunk pour de meilleures performances** : Soumettez des listes d'actions via `client.step()` plutôt que des actions uniques. Le serveur les exécute en interne et ne renvoie que l'observation finale au point de ré-inférence. Fonctionne uniquement pour un serveur avec le flag --no_save_process.
 - Chargez les poids du modèle dans `__init__` et gardez `get_action` centré sur l'inférence.
 - Utilisez `reset=True` dans `obs` pour détecter le premier pas et, lorsque la tâche en arrière-plan change d'épisode, réinitialiser l'état récurrent ou le buffer de chunk.
 - Les images sont en `uint8` HWC -- appliquez la normalisation de votre modèle avant l'inférence.

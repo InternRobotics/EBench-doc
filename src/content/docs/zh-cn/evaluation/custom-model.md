@@ -44,6 +44,27 @@ action = {
 
 也可以使用 `ee_pose` 控制：将 `control_type` 设为 `"ee_pose"`，`action` 改为 `[pos, quat, gripper]` 对。
 
+## 块模式（推荐）
+
+**推荐做法：** 不要每步都用单个动作调用 `client.step()`，而是提交动作块以获得更好的性能：
+
+```python
+# 以块的形式提交动作列表
+actions = [action_dict_1, action_dict_2, action_dict_3]
+obs, done = client.step(actions)
+```
+
+**优点：** 服务器会在内部执行块中的所有动作，仅在重新推理点返回最终观测，从而减少网络开销并便于性能调优。
+
+**多 worker 评测：** 对于多个 worker，只需以不同的 `worker_ids` 运行多个独立进程：
+```bash
+# 终端 1：worker "0"
+python model_client.py --worker_id 0
+
+# 终端 2：worker "1"
+python model_client.py --worker_id 1
+```
+
 ## 示例：单步模式
 
 ```python
@@ -170,6 +191,7 @@ finally:
 
 ## 提示
 
+- **使用块模式以获得更好的性能**：通过 `client.step()` 提交动作列表，而不是单个动作。服务器会在内部执行这些动作，仅在重新推理点返回最终观测。仅适用于带 --no_save_process 标志的服务器。
 - 模型权重在 `__init__` 中加载，`get_action` 只做推理。
 - 用 `obs` 中的 `reset=True` 判断第一步，当后台任务切换到新 episode 时清空历史状态或 chunk 缓冲。
 - 图像是 `uint8` HWC 格式——送入模型前做好归一化。

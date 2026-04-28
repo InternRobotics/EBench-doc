@@ -44,6 +44,27 @@ action = {
 
 Alternativ koennen Sie `ee_pose`-Steuerung verwenden, indem Sie `control_type` auf `"ee_pose"` setzen und `[pos, quat, gripper]`-Paare anstelle von Gelenkpositionen angeben.
 
+## Chunk-Modus (empfohlen)
+
+**Bevorzugter Ansatz:** Anstatt `client.step()` mit einer einzelnen Aktion pro Schritt aufzurufen, reichen Sie Aktions-Chunks fuer eine bessere Leistung ein:
+
+```python
+# Eine Liste von Aktionen als Chunk einreichen
+actions = [action_dict_1, action_dict_2, action_dict_3]
+obs, done = client.step(actions)
+```
+
+**Vorteile:** Der Server fuehrt alle Aktionen im Chunk intern aus und gibt nur die finale Beobachtung am Re-Inferenzpunkt zurueck. Dies reduziert den Netzwerkaufwand und ermoeglicht eine bessere Performance-Optimierung.
+
+**Multi-Worker-Evaluation:** Fuer mehrere Worker fuehren Sie einfach separate Prozesse mit unterschiedlichen `worker_ids` aus:
+```bash
+# Terminal 1: Worker "0"
+python model_client.py --worker_id 0
+
+# Terminal 2: Worker "1"
+python model_client.py --worker_id 1
+```
+
 ## Beispiel: Einzel-Schritt-Modus
 
 ```python
@@ -170,6 +191,7 @@ finally:
 
 ## Tipps
 
+- **Verwenden Sie den Chunk-Modus fuer bessere Leistung**: Reichen Sie Aktionslisten ueber `client.step()` ein anstelle einzelner Aktionen. Der Server fuehrt sie intern aus und gibt nur die finale Beobachtung am Re-Inferenzpunkt zurueck. Funktioniert nur mit Server unter Verwendung des --no_save_process Flags.
 - Laden Sie Modellgewichte in `__init__`; halten Sie `get_action` auf die Inferenz fokussiert.
 - Nutzen Sie `reset=True` in `obs`, um den ersten Schritt zu erkennen und beim Wechsel der Hintergrundepisode rekurrenten/Chunk-Zustand zurückzusetzen.
 - Bilder sind `uint8` im HWC-Format -- wenden Sie die Normalisierung Ihres Modells vor der Inferenz an.
