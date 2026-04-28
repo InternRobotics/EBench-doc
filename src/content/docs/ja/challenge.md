@@ -52,7 +52,8 @@ pip install -e .
 gmp online submit \
   --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
-  --benchmark_set EBench \
+  --task_id "$PREVIOUS_TASK" \  # optional: continue with a previous task
+  --benchmark_set ebench_generalist \
   --model_name internVLA \
   --model_type VLA \
   --submitter_name test \
@@ -67,7 +68,7 @@ gmp online submit \
 | task_id | string | T2025123100001 | オプション、前回のタスク再実行時に前のtask_idを含めることができます |
 | model_name | string | internVLA | モデル名 |
 | model_type | string | VLA | モデルタイプ |
-| benchmark_set | string | EBench | ベンチマークセットタイプ、現在EBenchのみ許可されています |
+| benchmark_set | string | EBench | ベンチマークセットタイプ、現在ebench_generalistのみ許可されています |
 | submitter_name | string | SHlab | 組織/開発者名 |
 | submitter_homepage | string | http://example.com | 提出者ホームページ |
 | is_public | int | 0 | 公開かどうか<br>0 いいえ<br>1 はい |
@@ -75,9 +76,22 @@ gmp online submit \
 バックエンドタスクの準備が完了すると、コマンドは次のようなフィールドを返します。
 
 ```json
+Waiting for available server (task_id=b5dddc6de60c4aec8236500b8e3dc0e1)...
+Still waiting... elapsed 0.1s. Next check in 5.0s.
+Still waiting... elapsed 5.3s. Next check in 5.0s.
+Ready after 10.4s. endpoint=https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod
 {
-  "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "task_id": "b5dddc6de60c4aec8236500b8e3dc0e1",
+  "endpoint": "https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod",
+  "response": {
+    "code": 0,
+    "msg": "success",
+    "trace_id": "4a4136c66bdc80922ccc6485c44fa9e5",
+    "data": {
+      "ready": true,
+      "endpoint": "https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod"
+    }
+  }
 }
 ```
 
@@ -86,15 +100,52 @@ gmp online submit \
 - `task_id`: 評価実行時に `run_id` として使用します。
 - `endpoint`: リモート評価 URL として使用します。
 
+#### Demo: `endpoint` と `task_id` を自動抽出する
+
+次の例では、簡略化した Python スクリプトで `gmp online submit` を実行し、返された出力から `endpoint` と `task_id` を抽出します。
+
+```python
+import os
+import json
+import subprocess
+
+def submit_online_task() -> tuple[str, str]:
+    cmd = [
+        'gmp', 'online', 'submit',
+        '--base_url', 'https://internrobotics.shlab.org.cn/eval',
+        '--token', os.environ['EBENCH_SUBMIT_TOKEN'],
+        '--benchmark_set', 'ebench_generalist',
+        '--model_name', 'internVLA',
+        '--model_type', 'VLA',
+        '--submitter_name', 'test',
+        '--submitter_homepage', 'test',
+        '--is_public', '0',
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    output = result.stdout
+    json_start = output.find('{')
+    payload = json.loads(output[json_start:])
+    endpoint = payload['endpoint']
+    task_id = payload['task_id']
+    print('endpoint=' + endpoint)
+    print('task_id=' + task_id)
+    return endpoint, task_id
+```
+
+スクリプトを実行すると、`endpoint` と `task_id` がそのまま出力され、後続の評価 worker 呼び出しに利用できます。
+
 ### 4. 評価 worker を開始する
 
 返された endpoint に対して evaluator を実行します。これはテスト評価です。ドキュメントに従ってあなた自身のモデル評価を作成してください。
 
 ```python
+endpoint, task_id = submit_online_task()
+
 client = EvalClient(
-    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
-    token="$EBENCH_SUBMIT_TOKEN"
-    run_id="9ea5fb6ae980430da626958c4433ea18",
+    base_url=endpoint,
+    token=os.environ['EBENCH_SUBMIT_TOKEN'],
+    run_id=task_id,
     worker_ids=["0"]
 )
 model = ModelClient(...)
@@ -115,9 +166,9 @@ finally:
 
 ```python
 client = EvalClient(
-    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
-    token="$EBENCH_SUBMIT_TOKEN"
-    run_id="9ea5fb6ae980430da626958c4433ea18",
+    base_url=endpoint,
+    token=os.environ['EBENCH_SUBMIT_TOKEN'],
+    run_id=task_id,
     worker_ids=["1"]
 )
 ...
@@ -133,7 +184,7 @@ gmp online submit \
   # ...
 ```
 
-接続タイムアウトが発生した場合は、クライアントを再起動して接続を復旧してください。
+接続タイムアウトが発生した場合は、クライアントを再起動して接続を復旧してください。進捗はサーバーに保存されます。
 
 ### 5. タスクを監視する
 
@@ -148,6 +199,18 @@ gmp status \
   --run_id "$EBENCH_TASK_ID"
 ```
 
+### 6. タスクを停止する
+
+評価セッションを停止するには：
+
+```
+gmp online stop \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID" \
+  --user_id "$USER_ID"    # ウェブサイトから取得、アカウントページ
+```
+
 ## オンライン提出 URL
 
 公式プラットフォームの base URL を使ってタスクを作成します。
@@ -156,10 +219,10 @@ gmp status \
 https://internrobotics.shlab.org.cn/eval
 ```
 
-`gmp online submit` の後は、返されたタスク専用 endpoint を評価に使用します。
+`gmp online submit` の後、そのタスクに対して返された endpoint を評価に使用します。
 
 ```text
-https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
+https://internverse.shlab.org.cn/evalserver/<task-endpoint>
 ```
 
 ## スコアリングルール

@@ -52,7 +52,8 @@ Utilisez `gmp online submit` pour demander une tache d'evaluation distante :
 gmp online submit \
   --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
-  --benchmark_set EBench \
+  --task_id "$PREVIOUS_TASK" \  # optional: continue with a previous task
+  --benchmark_set ebench_generalist \
   --model_name internVLA \
   --model_type VLA \
   --submitter_name test \
@@ -67,7 +68,7 @@ gmp online submit \
 | task_id | string | T2025123100001 | Optionnel, peut inclure le task_id précédent pour ré-exécution de tâche |
 | model_name | string | internVLA | Nom du modèle |
 | model_type | string | VLA | Type de modèle |
-| benchmark_set | string | EBench | Type d'ensemble de benchmark, actuellement seulement EBench est autorisé |
+| benchmark_set | string | EBench | Type d'ensemble de benchmark, actuellement seulement ebench_generalist est autorisé |
 | submitter_name | string | SHlab | Nom d'organisation/développeur |
 | submitter_homepage | string | http://example.com | Page d'accueil du soumissionnaire |
 | is_public | int | 0 | Si public<br>0 Non<br>1 Oui |
@@ -75,9 +76,22 @@ gmp online submit \
 Une fois la tache backend prete, la commande renvoie des champs comme ceux-ci :
 
 ```json
+Waiting for available server (task_id=b5dddc6de60c4aec8236500b8e3dc0e1)...
+Still waiting... elapsed 0.1s. Next check in 5.0s.
+Still waiting... elapsed 5.3s. Next check in 5.0s.
+Ready after 10.4s. endpoint=https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod
 {
-  "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "task_id": "b5dddc6de60c4aec8236500b8e3dc0e1",
+  "endpoint": "https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod",
+  "response": {
+    "code": 0,
+    "msg": "success",
+    "trace_id": "4a4136c66bdc80922ccc6485c44fa9e5",
+    "data": {
+      "ready": true,
+      "endpoint": "https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod"
+    }
+  }
 }
 ```
 
@@ -86,15 +100,52 @@ Conservez ces deux valeurs :
 - `task_id` : utilisez-le comme `run_id` lors de l'execution de l'evaluation.
 - `endpoint` : utilisez-le comme URL d'evaluation distante.
 
+#### Demo : extraire automatiquement `endpoint` et `task_id`
+
+L'exemple suivant utilise un script Python simplifie pour executer `gmp online submit` et extraire `endpoint` ainsi que `task_id` a partir de la sortie renvoyee :
+
+```python
+import os
+import json
+import subprocess
+
+def submit_online_task() -> tuple[str, str]:
+    cmd = [
+        'gmp', 'online', 'submit',
+        '--base_url', 'https://internrobotics.shlab.org.cn/eval',
+        '--token', os.environ['EBENCH_SUBMIT_TOKEN'],
+        '--benchmark_set', 'ebench_generalist',
+        '--model_name', 'internVLA',
+        '--model_type', 'VLA',
+        '--submitter_name', 'test',
+        '--submitter_homepage', 'test',
+        '--is_public', '0',
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    output = result.stdout
+    json_start = output.find('{')
+    payload = json.loads(output[json_start:])
+    endpoint = payload['endpoint']
+    task_id = payload['task_id']
+    print('endpoint=' + endpoint)
+    print('task_id=' + task_id)
+    return endpoint, task_id
+```
+
+Une fois le script execute, `endpoint` et `task_id` sont affiches directement. Vous pouvez ensuite les reutiliser dans l'appel du worker d'evaluation.
+
 ### 4. Demarrer les workers d'evaluation
 
 Executez l'evaluateur sur l'endpoint renvoye. Ceci est une evaluation de test. Suivez la documentation pour creer votre propre evaluation de modele.
 
 ```python
+endpoint, task_id = submit_online_task()
+
 client = EvalClient(
-    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
-    token="$EBENCH_SUBMIT_TOKEN"
-    run_id="9ea5fb6ae980430da626958c4433ea18",
+    base_url=endpoint,
+    token=os.environ['EBENCH_SUBMIT_TOKEN'],
+    run_id=task_id,
     worker_ids=["0"]
 )
 model = ModelClient(...)
@@ -115,9 +166,9 @@ Vous pouvez demarrer plusieurs eval clients avec des IDs differents. Par exemple
 
 ```python
 client = EvalClient(
-    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
-    token="$EBENCH_SUBMIT_TOKEN"
-    run_id="9ea5fb6ae980430da626958c4433ea18",
+    base_url=endpoint,
+    token=os.environ['EBENCH_SUBMIT_TOKEN'],
+    run_id=task_id,
     worker_ids=["1"]
 )
 ...
@@ -133,7 +184,7 @@ gmp online submit \
   # ...
 ```
 
-Si vous rencontrez des délais d'attente de connexion, redémarrez le client pour récupérer.
+Si vous rencontrez des délais d'attente de connexion, redémarrez le client pour récupérer. La progression sera sauvegardée sur le serveur.
 
 ### 5. Surveiller la tache
 
@@ -148,6 +199,18 @@ gmp status \
   --run_id "$EBENCH_TASK_ID"
 ```
 
+### 6. Arrêter la tâche
+
+Arrêtez une session d'évaluation avec :
+
+```
+gmp online stop \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID" \
+  --user_id "$USER_ID"    # obtenir depuis le site web, votre page de compte
+```
+
 ## URL de soumission en ligne
 
 Creez les taches via l'URL de base officielle de la plateforme :
@@ -159,7 +222,7 @@ https://internrobotics.shlab.org.cn/eval
 Apres `gmp online submit`, utilisez l'endpoint renvoye pour cette tache afin d'effectuer l'evaluation :
 
 ```text
-https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
+https://internverse.shlab.org.cn/evalserver/<task-endpoint>
 ```
 
 ## Regles de notation

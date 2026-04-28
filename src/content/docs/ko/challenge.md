@@ -52,7 +52,8 @@ pip install -e .
 gmp online submit \
   --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
-  --benchmark_set EBench \
+  --task_id "$PREVIOUS_TASK" \  # 선택 사항: 이전 작업 이어서 진행
+  --benchmark_set ebench_generalist \
   --model_name internVLA \
   --model_type VLA \
   --submitter_name test \
@@ -60,14 +61,14 @@ gmp online submit \
   --is_public 0
 ```
 
-### 매개변수
+#### 매개변수
 
 | 매개변수 | 타입 | 예시 | 설명 |
 |-----------|------|---------|-------------|
 | task_id | string | T2025123100001 | 선택사항, 작업 재실행 시 이전 task_id를 포함할 수 있습니다 |
 | model_name | string | internVLA | 모델 이름 |
 | model_type | string | VLA | 모델 타입 |
-| benchmark_set | string | EBench | 벤치마크 세트 타입, 현재 EBench만 허용됩니다 |
+| benchmark_set | string | EBench | 벤치마크 세트 타입, 현재 ebench_generalist만 허용됩니다 |
 | submitter_name | string | SHlab | 조직/개발자 이름 |
 | submitter_homepage | string | http://example.com | 제출자 홈페이지 |
 | is_public | int | 0 | 공개 여부<br>0 아니오<br>1 예 |
@@ -75,9 +76,22 @@ gmp online submit \
 백엔드 작업이 준비되면 명령은 다음과 같은 필드를 반환합니다.
 
 ```json
+Waiting for available server (task_id=b5dddc6de60c4aec8236500b8e3dc0e1)...
+Still waiting... elapsed 0.1s. Next check in 5.0s.
+Still waiting... elapsed 5.3s. Next check in 5.0s.
+Ready after 10.4s. endpoint=https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod
 {
-  "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "task_id": "b5dddc6de60c4aec8236500b8e3dc0e1",
+  "endpoint": "https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod",
+  "response": {
+    "code": 0,
+    "msg": "success",
+    "trace_id": "4a4136c66bdc80922ccc6485c44fa9e5",
+    "data": {
+      "ready": true,
+      "endpoint": "https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod"
+    }
+  }
 }
 ```
 
@@ -86,15 +100,52 @@ gmp online submit \
 - `task_id`: 평가 실행 시 `run_id` 로 사용합니다.
 - `endpoint`: 원격 평가 URL 로 사용합니다.
 
+#### Demo: `endpoint` 와 `task_id` 자동 추출
+
+다음 예시는 간단한 Python 스크립트로 `gmp online submit` 을 실행하고, 반환된 출력에서 `endpoint` 와 `task_id` 를 추출합니다.
+
+```python
+import os
+import json
+import subprocess
+
+def submit_online_task() -> tuple[str, str]:
+    cmd = [
+        'gmp', 'online', 'submit',
+        '--base_url', 'https://internrobotics.shlab.org.cn/eval',
+        '--token', os.environ['EBENCH_SUBMIT_TOKEN'],
+        '--benchmark_set', 'ebench_generalist',
+        '--model_name', 'internVLA',
+        '--model_type', 'VLA',
+        '--submitter_name', 'test',
+        '--submitter_homepage', 'test',
+        '--is_public', '0',
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    output = result.stdout
+    json_start = output.find('{')
+    payload = json.loads(output[json_start:])
+    endpoint = payload['endpoint']
+    task_id = payload['task_id']
+    print('endpoint=' + endpoint)
+    print('task_id=' + task_id)
+    return endpoint, task_id
+```
+
+스크립트를 실행하면 `endpoint` 와 `task_id` 가 바로 출력되며, 이후 평가 worker 호출에서 그대로 사용할 수 있습니다.
+
 ### 4. 평가 worker 시작
 
 반환된 endpoint 에 대해 evaluator 를 실행합니다. 이것은 테스트 평가입니다. 자신의 모델 평가를 만들려면 문서를 따르세요.
 
 ```python
+endpoint, task_id = submit_online_task()
+
 client = EvalClient(
-    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
-    token="$EBENCH_SUBMIT_TOKEN"
-    run_id="9ea5fb6ae980430da626958c4433ea18",
+    base_url=endpoint,
+    token=os.environ['EBENCH_SUBMIT_TOKEN'],
+    run_id=task_id,
     worker_ids=["0"]
 )
 model = ModelClient(...)
@@ -115,9 +166,9 @@ finally:
 
 ```python
 client = EvalClient(
-    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
-    token="$EBENCH_SUBMIT_TOKEN"
-    run_id="9ea5fb6ae980430da626958c4433ea18",
+    base_url=endpoint,
+    token=os.environ['EBENCH_SUBMIT_TOKEN'],
+    run_id=task_id,
     worker_ids=["1"]
 )
 ...
@@ -133,7 +184,7 @@ gmp online submit \
   # ...
 ```
 
-연결 타임아웃이 발생하면 클라이언트를 다시 시작하여 연결을 복구하세요.
+연결 타임아웃이 발생하면 클라이언트를 다시 시작하여 연결을 복구하세요. 진행 상황은 서버에 저장됩니다.
 
 ### 5. 작업 상태 확인
 
@@ -148,6 +199,18 @@ gmp status \
   --run_id "$EBENCH_TASK_ID"
 ```
 
+### 6. 작업 중지
+
+평가 세션을 중지하려면:
+
+```
+gmp online stop \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID" \
+  --user_id "$USER_ID"    # 웹사이트에서 가져오기, 계정 페이지
+```
+
 ## 온라인 제출 URL
 
 공식 플랫폼 base URL 을 통해 작업을 생성합니다.
@@ -156,18 +219,18 @@ gmp status \
 https://internrobotics.shlab.org.cn/eval
 ```
 
-`gmp online submit` 이후에는 반환된 작업별 endpoint 를 평가에 사용합니다.
+`gmp online submit` 후, 해당 작업에 대해 반환된 endpoint 를 평가에 사용합니다.
 
 ```text
-https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
+https://internverse.shlab.org.cn/evalserver/<task-endpoint>
 ```
 
-## 점수 규칙
+## 채점 규칙
 
-- 평가된 각 에피소드는 `0.0` 에서 `1.0` 사이의 작업 점수를 생성합니다.
-- 에피소드 내에서 요구되는 목표 조건이 완료되면 해당 작업은 만점을 받고, 그렇지 않으면 `0.0` 을 받습니다.
-- 리더보드 점수는 제출된 benchmark 세트의 평가된 에피소드 전체에 대한 작업 점수의 평균입니다.
-- 작업별 성공 기준에 대한 자세한 내용은 [작업 쇼케이스](/ko/evaluation/task-showcase/) 를 참조하세요. 각 작업에는 `Location`, `Instruction`, `Score` 설명이 포함되어 있습니다.
+- 각 평가 episode 는 `0.0` 에서 `1.0` 사이의 task 점수를 생성합니다.
+- episode 안에서 요구된 목표 조건을 완료하면 해당 task 는 만점을 받고, 그렇지 않으면 `0.0` 을 받습니다.
+- 리더보드 점수는 제출된 benchmark 세트에서 평가된 모든 episode 의 task 점수 평균입니다.
+- task 별 성공 기준은 [작업 소개](/ko/evaluation/task-showcase/)를 참고하세요. 각 task 에 `Location`, `Instruction`, `Score` 설명이 포함되어 있습니다.
 
 ## 예시 체크리스트
 

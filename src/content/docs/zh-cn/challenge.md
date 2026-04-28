@@ -3,7 +3,7 @@ title: 挑战赛
 description: 将 EBench 评测结果提交到线上挑战榜单。
 ---
 
-EBench Challenge 支持在线提交 benchmark 结果。请按照以下步骤准备有效运行，并提交到排行榜服务。
+EBench 挑战 支持在线提交 benchmark 结果。请按照以下步骤准备有效运行，并提交到排行榜服务。
 
 ## Baseline 与快速开始
 
@@ -52,6 +52,7 @@ pip install -e .
 gmp online submit \
   --base_url https://internrobotics.shlab.org.cn/eval \
   --token "$EBENCH_SUBMIT_TOKEN" \
+  --task_id "$PREVIOUS_TASK" \  # 可选：继续使用之前的任务
   --benchmark_set ebench_generalist \
   --model_name internVLA \
   --model_type VLA \
@@ -60,7 +61,7 @@ gmp online submit \
   --is_public 0
 ```
 
-### 参数
+#### 参数
 
 | 参数 | 类型 | 示例 | 说明 |
 |------|------|------|------|
@@ -75,9 +76,22 @@ gmp online submit \
 后端任务准备完成后，命令会返回如下字段：
 
 ```json
+Waiting for available server (task_id=b5dddc6de60c4aec8236500b8e3dc0e1)...
+Still waiting... elapsed 0.1s. Next check in 5.0s.
+Still waiting... elapsed 5.3s. Next check in 5.0s.
+Ready after 10.4s. endpoint=https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod
 {
-  "task_id": "9ea5fb6ae980430da626958c4433ea18",
-  "endpoint": "https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master"
+  "task_id": "b5dddc6de60c4aec8236500b8e3dc0e1",
+  "endpoint": "https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod",
+  "response": {
+    "code": 0,
+    "msg": "success",
+    "trace_id": "4a4136c66bdc80922ccc6485c44fa9e5",
+    "data": {
+      "ready": true,
+      "endpoint": "https://internverse.shlab.org.cn/eval-server/2813aea1/api/predict/embodied_eval.genmanip_eas_1_master_prod"
+    }
+  }
 }
 ```
 
@@ -86,15 +100,52 @@ gmp online submit \
 - `task_id`：在运行评测时作为 `run_id` 使用。
 - `endpoint`：作为远端评测 URL 使用。
 
+#### Demo：自动提取 `endpoint` 和 `task_id`
+
+下面的示例使用一个简化的 Python 脚本来执行 `gmp online submit`，并从返回输出中提取 `endpoint` 和 `task_id`：
+
+```python
+import os
+import json
+import subprocess
+
+def submit_online_task() -> tuple[str, str]:
+    cmd = [
+        'gmp', 'online', 'submit',
+        '--base_url', 'https://internrobotics.shlab.org.cn/eval',
+        '--token', os.environ['EBENCH_SUBMIT_TOKEN'],
+        '--benchmark_set', 'ebench_generalist',
+        '--model_name', 'internVLA',
+        '--model_type', 'VLA',
+        '--submitter_name', 'test',
+        '--submitter_homepage', 'test',
+        '--is_public', '0',
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    output = result.stdout
+    json_start = output.find('{')
+    payload = json.loads(output[json_start:])
+    endpoint = payload['endpoint']
+    task_id = payload['task_id']
+    print('endpoint=' + endpoint)
+    print('task_id=' + task_id)
+    return endpoint, task_id
+```
+
+脚本运行后会直接打印出 `endpoint` 和 `task_id`，后续调用评测 worker 时可以直接使用它们。
+
 ### 4. 启动评测 worker
 
 让评测器连接返回的 endpoint 运行。这是一个测试评测。按照文档说明来创建你自己的模型评测。
 
 ```python
+endpoint, task_id = submit_online_task()
+
 client = EvalClient(
-    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
-    token="$EBENCH_SUBMIT_TOKEN"
-    run_id="9ea5fb6ae980430da626958c4433ea18",
+    base_url=endpoint,
+    token=os.environ['EBENCH_SUBMIT_TOKEN'],
+    run_id=task_id,
     worker_ids=["0"]
 )
 model = ModelClient(...)
@@ -115,9 +166,9 @@ finally:
 
 ```python
 client = EvalClient(
-    base_url="https://internrobotics.shlab.org.cn/evalserver/9391d9e8/api/predict/embodied_eval.genmanip_eas_1_master",
-    token="$EBENCH_SUBMIT_TOKEN"
-    run_id="9ea5fb6ae980430da626958c4433ea18",
+    base_url=endpoint,
+    token=os.environ['EBENCH_SUBMIT_TOKEN'],
+    run_id=task_id,
     worker_ids=["1"]
 )
 ...
@@ -133,7 +184,7 @@ gmp online submit \
   # ...
 ```
 
-如果遇到连接超时问题，请重启客户端以恢复连接。
+如果遇到连接超时问题，请重启客户端以恢复连接。进度将保存在服务器上。
 
 ### 5. 监控任务状态
 
@@ -148,6 +199,18 @@ gmp status \
   --run_id "$EBENCH_TASK_ID"
 ```
 
+### 6. 停止任务
+
+停止评测会话：
+
+```
+gmp online stop \
+  --url "$EBENCH_ONLINE_ENDPOINT" \
+  --token "$EBENCH_SUBMIT_TOKEN" \
+  --run_id "$EBENCH_TASK_ID" \
+  --user_id "$USER_ID"    # 从网站获取，你的账户页面
+```
+
 ## 在线提交 URL
 
 通过官方平台 base URL 创建任务：
@@ -159,7 +222,7 @@ https://internrobotics.shlab.org.cn/eval
 执行 `gmp online submit` 后，使用返回的任务专属 endpoint 进行评测：
 
 ```text
-https://internrobotics.shlab.org.cn/evalserver/<task-endpoint>
+https://internverse.shlab.org.cn/evalserver/<task-endpoint>
 ```
 
 ## 得分规则
