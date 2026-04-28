@@ -97,6 +97,11 @@ export default defineConfig({
 					translations: { 'zh-CN': '快速开始', fr: 'Mise en route', ja: 'はじめに', ko: '시작하기', de: 'Erste Schritte', es: 'Primeros pasos' },
 					items: [
 						{
+							slug: 'getting-started/overview',
+							label: 'Benchmark Overview',
+							translations: { 'zh-CN': '基准总览', fr: 'Aperçu du benchmark', ja: 'ベンチマーク概要', ko: '벤치마크 개요', de: 'Benchmark-Uebersicht', es: 'Visión general del benchmark' },
+						},
+						{
 							slug: 'getting-started/environment',
 							label: 'Environment Setup',
 							translations: { 'zh-CN': '环境配置', fr: "Installation de l'environnement", ja: '環境構築', ko: '환경 설정', de: 'Umgebung einrichten', es: 'Configuración del entorno' },
