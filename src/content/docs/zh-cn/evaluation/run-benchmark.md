@@ -33,7 +33,11 @@ gmp submit ebench/mobile_manip/test --run_id my_first_run
 
 Split：`val_train`、`val_unseen`、`test`
 
-一次性提交所有任务：`gmp submit ebench --run_id full_run`。
+示例：
+
+1. 一次性提交所有任务：`gmp submit ebench --run_id full_run`。
+2. 提交`mobile_manip`中所有评测任务：`gmp submit ebench/mobile_manip/test --run_id evaluate_mobile_manip`。
+3. 提交`table_top_manip`中`collect_coffee_beans`的评测任务：`gmp submit ebench/table_top_manip/test/collect_coffee_beans --run_id evaluate_only_one_task`。
 
 ## 3. 接入模型
 

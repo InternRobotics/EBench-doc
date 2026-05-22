@@ -33,7 +33,11 @@ Available task settings:
 
 Splits: `val_train`, `val_unseen`, `test`
 
-Submit all tasks at once with `gmp submit ebench --run_id full_run`.
+Examples:
+
+1. Submit all tasks at once: `gmp submit ebench --run_id full_run`.
+2. Submit all evaluation tasks in `mobile_manip`: `gmp submit ebench/mobile_manip/test --run_id evaluate_mobile_manip`.
+3. Submit `collect_coffee_beans` in `table_top_manip`: `gmp submit ebench/table_top_manip/test/collect_coffee_beans --run_id evaluate_only_one_task`.
 
 ## 3. Connect your model
 

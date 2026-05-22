@@ -33,7 +33,11 @@ gmp submit ebench/mobile_manip/test --run_id my_first_run
 
 スプリット：`val_train`、`val_unseen`、`test`
 
-`gmp submit ebench --run_id full_run` で全タスクを一括送信できます。
+例：
+
+1. 全タスクを一括送信：`gmp submit ebench --run_id full_run`。
+2. `mobile_manip` の全評価タスクを送信：`gmp submit ebench/mobile_manip/test --run_id evaluate_mobile_manip`。
+3. `table_top_manip` の `collect_coffee_beans` 評価タスクを送信：`gmp submit ebench/table_top_manip/test/collect_coffee_beans --run_id evaluate_only_one_task`。
 
 ## 3. モデルの接続
 

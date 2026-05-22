@@ -33,7 +33,11 @@ Paramètres de tâche disponibles :
 
 Splits : `val_train`, `val_unseen`, `test`
 
-Soumettez toutes les tâches en une seule fois avec `gmp submit ebench --run_id full_run`.
+Exemples :
+
+1. Soumettre toutes les tâches en une seule fois : `gmp submit ebench --run_id full_run`.
+2. Soumettre toutes les tâches d'évaluation de `mobile_manip` : `gmp submit ebench/mobile_manip/test --run_id evaluate_mobile_manip`.
+3. Soumettre la tâche d'évaluation `collect_coffee_beans` dans `table_top_manip` : `gmp submit ebench/table_top_manip/test/collect_coffee_beans --run_id evaluate_only_one_task`.
 
 ## 3. Connecter votre modèle
 

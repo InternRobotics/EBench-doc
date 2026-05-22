@@ -33,7 +33,11 @@ gmp submit ebench/mobile_manip/test --run_id my_first_run
 
 Split: `val_train`, `val_unseen`, `test`
 
-모든 태스크를 한 번에 제출하려면 `gmp submit ebench --run_id full_run`을 사용하세요.
+예시:
+
+1. 모든 태스크를 한 번에 제출: `gmp submit ebench --run_id full_run`.
+2. `mobile_manip`의 모든 평가 태스크 제출: `gmp submit ebench/mobile_manip/test --run_id evaluate_mobile_manip`.
+3. `table_top_manip`의 `collect_coffee_beans` 평가 태스크 제출: `gmp submit ebench/table_top_manip/test/collect_coffee_beans --run_id evaluate_only_one_task`.
 
 ## 3. 모델 연결
 

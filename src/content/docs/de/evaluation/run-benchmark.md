@@ -33,7 +33,11 @@ Verfuegbare Aufgabeneinstellungen:
 
 Splits: `val_train`, `val_unseen`, `test`
 
-Alle Aufgaben auf einmal einreichen: `gmp submit ebench --run_id full_run`.
+Beispiele:
+
+1. Alle Aufgaben auf einmal einreichen: `gmp submit ebench --run_id full_run`.
+2. Alle Evaluationsaufgaben in `mobile_manip` einreichen: `gmp submit ebench/mobile_manip/test --run_id evaluate_mobile_manip`.
+3. Die Evaluationsaufgabe `collect_coffee_beans` in `table_top_manip` einreichen: `gmp submit ebench/table_top_manip/test/collect_coffee_beans --run_id evaluate_only_one_task`.
 
 ## 3. Modell verbinden
 

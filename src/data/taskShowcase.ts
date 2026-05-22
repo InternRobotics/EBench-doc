@@ -328,8 +328,8 @@ export const showcaseCategories: TaskCategory[] = [
 					'zh-cn': '将散落的 coffee beans 收集到目标容器或区域中。',
 				},
 				score: {
-					en: 'Each coffee bean placed in the jar contributes `0.5/7`. The total score is the sum over all seven beans.',
-					'zh-cn': '每颗 coffee bean 成功进入 jar 记 `0.5/7`。总分为七颗豆子的得分之和。',
+					en: 'The lid contributes `0.5` when it is placed on the jar, aligned near the jar axis, and parallel to the tabletop. Each of the seven coffee beans in the jar contributes `0.5/7`.',
+					'zh-cn': '盖子放在罐子上、与罐子中心轴相近且平行于桌面时记 `0.5`。7 颗咖啡豆中，每颗进入罐子各记 `0.5/7`。',
 				},
 			},
 			{
@@ -342,8 +342,8 @@ export const showcaseCategories: TaskCategory[] = [
 					'zh-cn': '按任务要求翻转 cup，并完成 cookies 收集。',
 				},
 				score: {
-					en: 'The cup contributes `0.5` when its opening faces upward and its center axis stays within 10 degrees of the world Z axis. Each cookie placed in the bowl contributes `0.5/5`.',
-					'zh-cn': 'cup 杯口朝上且中心轴与世界坐标 Z 轴夹角在 10 度以内时记 `0.5`。每个 cookie 成功放入 bowl 各记 `0.5/5`。',
+					en: 'The cup contributes `0.5` when its opening faces upward and its center axis is within 10 degrees of the world Z axis. Each of the five cookies in the bowl contributes `0.5/5`.',
+					'zh-cn': '杯口朝上且杯子中心轴与 World Z axis 夹角在 10° 以内时记 `0.5`。5 块饼干中，每块放入碗内各记 `0.5/5`。',
 				},
 			},
 			{
@@ -356,8 +356,8 @@ export const showcaseCategories: TaskCategory[] = [
 					'zh-cn': '移动并对齐 frame，使其按要求贴靠在 pen holder 上。',
 				},
 				score: {
-					en: 'Score `1.0` when the frame is upright, tightly leaning against the pen holder, and the frame normal stays within 45 degrees of the world Z axis.',
-					'zh-cn': '当 frame 正向、紧贴 pen holder 倾斜放置，且 frame 法向量与世界坐标 Z 轴夹角在 45 度以内时，得分为 `1.0`。',
+					en: 'Temporal condition 1 (prerequisite): the frame center stays above a required height (`1/3`). Temporal condition 2 (evaluated only after condition 1): the frame is in contact with the cup (`1/3`), and the frame stays in an upright leaning pose (`1/3`).',
+					'zh-cn': '时序条件 1（前置判断）：相框中心点保持一定高度，记 `1/3`。时序条件 2（满足上一条后再判断）：相框接触杯子，记 `1/3`，相框保持正向斜靠姿态，记 `1/3`。',
 				},
 			},
 			{
@@ -370,8 +370,8 @@ export const showcaseCategories: TaskCategory[] = [
 					'zh-cn': '抓取 gear，并将其安装到目标轴或槽位上。',
 				},
 				score: {
-					en: 'Score `1.0` when the operated gear is placed at the specified position and properly engaged with the other two gears.',
-					'zh-cn': '当被操作的 gear 被放到指定位置，且与另外两个 gear 正确啮合时，得分为 `1.0`。',
+					en: 'Placing the gear on the shaft contributes `0.5`. Properly meshing the gear with the other two gears contributes `0.5`.',
+					'zh-cn': '齿轮放在轴上记 `0.5`；齿轮与另外两个齿轮耦合记 `0.5`。',
 				},
 			},
 			{
@@ -384,8 +384,8 @@ export const showcaseCategories: TaskCategory[] = [
 					'zh-cn': '以要求的精度将 peg 插入目标孔位。',
 				},
 				score: {
-					en: 'Score `1.0` when the peg axis is aligned with the hole axis, inserted to the required depth, and remains vertical.',
-					'zh-cn': '当 peg 中心轴与孔洞中心轴对齐、插入到要求深度，并保持竖直状态时，得分为 `1.0`。',
+					en: 'Removing the peg from the original hole contributes `0.5`. Inserting the peg into the designated hole contributes `0.5`.',
+					'zh-cn': '棍子离开原来孔洞记 `0.5`；棍子放入指定孔洞记 `0.5`。',
 				},
 			},
 			{
@@ -398,8 +398,8 @@ export const showcaseCategories: TaskCategory[] = [
 					'zh-cn': '小心抓取 glass，并将其放入 glass box 中。',
 				},
 				score: {
-					en: 'Score `1.0` when the glasses are folded, placed inside the glasses box, and the box is closed. The folding angle must be within 20 degrees.',
-					'zh-cn': '当眼镜被折叠、放入眼镜盒中且眼镜盒关闭时，得分为 `1.0`。镜腿折叠角度需在 20 度以内。',
+					en: 'Folding both temples contributes `1/3`. Closing the glasses case contributes `1/3`. Placing the glasses in the case contributes `1/3`.',
+					'zh-cn': '两个镜腿折叠记 `1/3`；眼镜盒闭合记 `1/3`；眼镜在盒中记 `1/3`。',
 				},
 			},
 			{
@@ -412,8 +412,8 @@ export const showcaseCategories: TaskCategory[] = [
 					'zh-cn': '完成 nut 的对齐与拧紧操作。',
 				},
 				score: {
-					en: 'Score `1.0` when the nut is fully screwed onto the bolt.',
-					'zh-cn': '当 nut 被完整旋入 bolt 时，得分为 `1.0`。',
+					en: 'Temporal condition 1 (prerequisite): the nut is at the top end of the bolt (`0.5`). Temporal condition 2 (evaluated only after condition 1): the nut is fully tightened onto the bolt (`0.5`).',
+					'zh-cn': '时序条件 1（前置判断）：螺母位于螺栓上端，记 `0.5`。时序条件 2（满足上一条后再判断）：螺母完全旋入螺栓，记 `0.5`。',
 				},
 			},
 		],
